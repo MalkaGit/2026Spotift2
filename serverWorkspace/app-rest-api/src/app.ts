@@ -37,6 +37,7 @@ import {requestContextMiddleware} from "@mycompanyname/lib-common";
 import {authMiddleware} from "@mycompanyname/lib-common";
 import {requestLoggerMiddleware} from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
+import { usersRouter } from "./modules/users";
 
 const app = express();
 
@@ -46,7 +47,8 @@ app.use(requestContextMiddleware);
 app.use(express.json());
 
 // Authentication middleware - extracts user ID from x-user-id header
-app.use(authMiddleware({ required: true }));
+// Set to required: false to allow public endpoints like /users/register
+app.use(authMiddleware({ required: false }));
 
 // Request logging middleware - logs request summary after response is sent
 app.use(requestLoggerMiddleware);
@@ -57,7 +59,7 @@ app.get("/health", (_req, res) => {
 });
 
 // API Routes
-// Example: app.use("/api/songs", songRouter);
+app.use("/users", usersRouter);
 
 // Error Middleware (MUST be last - catches all errors from routes above)
 app.use(errorMiddleware);
