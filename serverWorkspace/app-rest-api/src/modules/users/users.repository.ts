@@ -1,0 +1,52 @@
+import { mysqlPool } from "@mycompanyname/lib-common";
+import { logger } from "@mycompanyname/lib-common";
+import { randomUUID } from "crypto";
+
+/**
+ * Register a new user in the database
+ * 
+ * @param email - User email address (must be unique)
+ * @param passwordHash - Pre-hashed password (should be hashed by service layer using bcrypt)
+ * @param role - User role ('listener' or 'artist', defaults to 'listener' in DB if not provided)
+ * @returns The generated UUID of the newly created user
+ * @throws Database errors may be thrown (e.g., duplicate email constraint violations), handled by error middleware
+ * 
+ * @example
+ * const userId = await registerUser("user@example.com", hashedPassword, "listener");
+ */
+export async function registerUser(email: string, passwordHash: string, role: string): Promise<string> {
+  const id = randomUUID();
+  const sql = `INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)`;
+  const params = [id, email, passwordHash, role];
+  
+  logger.debug("createUser - SQL query", { sql, params: [id, email, '[REDACTED]', role] });
+  await mysqlPool.query(sql, params);
+  
+  return id;
+}
+
+/**
+ * Check if a user with the given email already exists
+ * 
+ * @param email - Email address to check
+ * @returns true if user exists, false otherwise
+ * @throws Database errors may be thrown (handled by error middleware)
+ * 
+ * @example
+ * const userExists = await exists("user@example.com");
+ * if (userExists) {
+ *   throw new ConflictError("User already exists");
+ * }
+ */
+export async function exists(email: string): Promise<boolean> {
+  const sql = `SELECT 1 FROM users WHERE email = ? LIMIT 1`;
+  const params = [email];
+  
+  logger.debug("exists - SQL query", { sql, params });
+  const [rows] = await mysqlPool.query(sql, params);
+  const result = rows as any[];
+  
+  return result.length > 0;
+}
+
+
