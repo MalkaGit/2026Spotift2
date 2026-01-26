@@ -11,5 +11,6 @@
 export { createRequestValidator } from "./request-validator.middleware";
 export { requestContextMiddleware } from "./request-context.middleware";
 export { authMiddleware } from "./auth.middleware";
+export { AuthMiddleware_JwtMonolith as jwtAuthMiddleware } from "./auth.monolith.middleware";
 export { requestLoggerMiddleware } from "./request-logger.middleware";
 export { errorMiddleware } from "./error-handler.middleware";

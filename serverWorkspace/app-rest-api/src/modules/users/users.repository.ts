@@ -1,6 +1,7 @@
 import { mysqlPool } from "@mycompanyname/lib-common";
 import { logger } from "@mycompanyname/lib-common";
 import { randomUUID } from "crypto";
+import { UserEntity } from "./types/user.entity";
 
 /**
  * Register a new user in the database
@@ -49,4 +50,40 @@ export async function exists(email: string): Promise<boolean> {
   return result.length > 0;
 }
 
-
+/**
+ * Find a user by email
+ * 
+ * @param email - Email address to find
+ * @returns UserEntity if found, null otherwise
+ * @throws Database errors may be thrown (handled by error middleware)
+ * 
+ * @example
+ * const user = await findByEmail("user@example.com");
+ * if (user) {
+ *   return user;
+ * }
+ */
+export async function findByEmail(email: string): Promise<UserEntity | null> {
+  const sql = `SELECT id, email, password_hash, role, created_at FROM users WHERE email = ? LIMIT 1`;
+  const params = [email];
+  
+  logger.debug("findByEmail - SQL query", { sql, params });
+  const [rows] = await mysqlPool.query(sql, params);
+  const result = rows as any[];
+  
+  if (result.length === 0) {
+    return null;
+  }
+  
+  // Map database result (snake_case) to UserEntity (camelCase)
+  // This is necessary because the database returns snake_case fields
+  // but our domain model uses camelCase
+  const dbRow = result[0];
+  return {
+    id: dbRow.id,
+    email: dbRow.email,
+    passwordHash: dbRow.password_hash,
+    role: dbRow.role,
+    createdAt: dbRow.created_at,
+  };
+}

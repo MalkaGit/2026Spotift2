@@ -98,6 +98,13 @@ app-rest-api
        #DB_PORT=3306
        #DB_CONNECTION_LIMIT=10
 
+       #JWT Authentication
+       #JWT_SECRET: Secret key used to sign and verify JWT tokens
+       #   Should be a long, random, secure string (at least 32 characters)
+       #   In production, use a strong secret and keep it secure
+       #   Generate a secure secret: openssl rand -base64 32
+       #JWT_SECRET=your-secret-key-here-minimum-32-characters-long
+
 
 =============================================
 how to test:

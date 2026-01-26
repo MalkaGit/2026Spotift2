@@ -17,6 +17,7 @@
  * 
  * Error Code Categories:
  *    - BadRequestError codes (400): Invalid request parameters
+ *    - UnauthorizedError codes (401): Authentication failures
  *    - ConflictError codes (409): Resource conflicts (e.g., duplicate email)
  *    - NotFoundError codes (404): Entity not found (if needed in future)
  */
@@ -24,6 +25,9 @@
 export const UserErrorCode = {
     // BadRequestError codes (400)
     PASSWORD_TOO_WEAK: "USER_PASSWORD_TOO_WEAK",
+    
+    // UnauthorizedError codes (401)
+    INVALID_CREDENTIALS: "USER_INVALID_CREDENTIALS",
     
     // ConflictError codes (409)
     USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
