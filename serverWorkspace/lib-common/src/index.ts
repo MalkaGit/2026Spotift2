@@ -48,6 +48,9 @@ export { requestContextMiddleware } from "./app/express.middlewares";
 // Line below allows: import { authMiddleware } from "@server/lib-common";
 export { authMiddleware } from "./app/express.middlewares";
 
+// Line below allows: import { jwtAuthMiddleware } from "@server/lib-common";
+export { jwtAuthMiddleware } from "./app/express.middlewares";
+
 // Line below allows: import { requestLoggerMiddleware } from "@server/lib-common";
 export { requestLoggerMiddleware } from "./app/express.middlewares";
 
