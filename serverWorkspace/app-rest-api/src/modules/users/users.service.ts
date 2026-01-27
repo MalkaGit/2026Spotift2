@@ -7,7 +7,7 @@ import { LoginUserInput, LoginUserOutput } from "./types";
 import { UserProfile } from "./types/user.profile.model";
 import { UserErrorCode } from "./users.error.codes";
 
-import { BadRequestError, ConflictError, UnauthorizedError, NotFoundError } from "@mycompanyname/lib-common";
+import { BadRequestError, ConflictError, UnauthorizedError, NotFoundError, requestContext } from "@mycompanyname/lib-common";
 import { hash, compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
 
@@ -176,7 +176,6 @@ export async function login(input: LoginUserInput): Promise<LoginUserOutput>{
 /**
  * Operation: Get user profile
  * 
- * @param userId - User ID (UUID) extracted from JWT token
  * @returns User profile (email, role, createdAt) - excludes sensitive fields like passwordHash
  * @throws NotFoundError if user with the given ID does not exist
  * 
@@ -184,10 +183,20 @@ export async function login(input: LoginUserInput): Promise<LoginUserOutput>{
  *       Any authenticated user can view their own profile (no role-based authorization needed).
 
  * @example
- * const profile = await getUserProfile("123e4567-e89b-12d3-a456-426614174000");
+ * const profile = await getMe("123e4567-e89b-12d3-a456-426614174000");
  * // Returns: { email: "user@example.com", role: "listener", createdAt: "2024-01-01T00:00:00.000Z" }
  */
-export async function getUserProfile(userId: string): Promise<UserProfile> {
+export async function getMe(): Promise<UserProfile> {
+    
+     // Get userId from request context (set by JWT auth middleware)
+    const userId = requestContext.getUserId();
+    if (!userId) {
+      // This should not happen if JWT middleware is properly configured
+      // But we handle it defensively to provide a clear error message
+      throw new UnauthorizedError(
+        "Authentication required. User ID not found in request context."
+      );
+    }
     // BL: Find user by ID
     const user: UserEntity | null = await userRepo.findById(userId);
     

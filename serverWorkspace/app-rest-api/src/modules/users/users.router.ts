@@ -54,7 +54,7 @@ userRouter.post(
  */
 userRouter.get(
   '/me',
-  userController.getUserProfile
+  userController.getMe
 );
 
 export default userRouter;

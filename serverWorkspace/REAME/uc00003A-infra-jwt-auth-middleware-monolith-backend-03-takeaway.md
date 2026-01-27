@@ -1,9 +1,4 @@
-# 📚 JWT Auth Middleware - Key Takeaways
-
----
-
-## 🏗️ HLD (High-Level Design)
-
+TODO: go over
 ### 1. Simplicity
 
 - ✅ **Monolith** architecture
@@ -12,18 +7,7 @@
 
 ---
 
-### 2. Libraries Used
 
-**`jsonwebtoken` library**
-
-| Method | Purpose |
-|--------|---------|
-| `verify()` | Verifies the token |
-| `sign()` | Creates the token (used in login operation) |
-
-> **⚠️ Important**: Both `verify` and `sign` need the same `JWT_SECRET` (read from environment)
-
----
 
 ### 3. Tables Used - Monolith
 
@@ -33,62 +17,7 @@
 > 
 > User data comes from token payload (created during login).
 
----
 
-### 4. Modules Used - Monolith
-
-| Module | Purpose |
-|--------|---------|
-| `lib-common/app/express.middlewares` | Infrastructure middleware |
-| `lib-common/utils/request-context` | Framework-agnostic context |
-| `lib-common/domain/errors` | Error types |
-
----
-
-### 5. API Used - Monolith
-
-- ✅ Middleware runs on **every request** at app level
-- ✅ Public routes **skip authentication**
-- ✅ Protected routes **require valid JWT token**
-
----
-
-### 6. HLD Flow - Monolith
-
-**Architecture**: REST API on single server with access to all database
-
-#### 6.1 On Login
-
-```
-Monolith server uses sign() method and JWT_SECRET to return token.
-Client stores the token (with the user id, user role etc)
-
-Note: The sign() method adds expiration details to the token
-```
-
-#### 6.2 On Any Client Request
-
-```
-Client sends request to monolith server
-with authorization header: Bearer <token>
-```
-
-#### 6.3 Server Runs JWT Auth Middleware
-
-```
-(Monolith) server runs the JWT auth middleware
-and uses the verify() method and JWT_SECRET to get payload
-The middleware then stores the user id, user role in the request context
-
-The verify() method will throw exception if token expires
-```
-
-#### 6.4 Public Routes
-
-```
-Routes in publicRoutes list skip JWT processing entirely
-No token validation, no context population
-```
 
 ---
 
@@ -131,41 +60,7 @@ No token validation, no context population
 
 ---
 
-## 🚀 Step Ahead: Microservices Migration
 
-### Current (Monolith)
-
-```
-Client → Monolith Server
-         ↓
-    JWT Middleware verifies token
-         ↓
-    Stores userId/role in context
-         ↓
-    Controller/Service uses context
-```
-
-### Future (Microservices)
-
-```
-Client → API Gateway
-         ↓
-    API Gateway verifies JWT token
-         ↓
-    Adds x-user-id and x-role headers
-         ↓
-    Forwards to Microservice
-         ↓
-    Microservice middleware reads headers
-         ↓
-    Stores userId/role in context (same as monolith)
-         ↓
-    Controller/Service uses context (same code!)
-```
-
-> **✅ Key Insight**: The request context remains framework-agnostic in both cases!
-
----
 
 ## 💡 Key Learnings
 
@@ -189,25 +84,7 @@ Client → API Gateway
 
 ---
 
-### 🎯 When to Use This Pattern
-
-| Scenario | Use Case |
-|----------|----------|
-| ✅ | Monolith applications |
-| ✅ | Stateless authentication |
-| ✅ | Simple token-based auth |
-| ✅ | When you need user context in controllers/services |
-
 ---
-
-### ❌ When NOT to Use This Pattern
-
-| Scenario | Alternative |
-|----------|------------|
-| ❌ | When you need token revocation | Use sessions/blacklist |
-| ❌ | When you need refresh tokens | Extend with refresh token flow |
-| ❌ | When you need fine-grained permissions | Add authorization layer |
-| ❌ | When you need distributed sessions | Use session store |
 
 ---
 
@@ -241,14 +118,3 @@ Client → API Gateway
 - 🔄 Rate limiting
 - 🔄 Token caching for performance
 
----
-
-## 📖 Related Documentation
-
-- **Login Operation**: `uc00002-login-user-backend`
-- **Get User Profile**: `uc00003B-get-user-profile-backend`
-- **Middleware Implementation**: `lib-common/src/app/express.middlewares/auth.monolith.jwt.middleware.ts`
-
----
-
-**🎉 You're now ready to implement JWT authentication in your monolith!**
