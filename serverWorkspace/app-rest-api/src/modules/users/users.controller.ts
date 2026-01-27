@@ -1,7 +1,8 @@
-import { Response, NextFunction } from "express";
-import { TypedRequest } from "@mycompanyname/lib-common";
+import { Request, Response, NextFunction } from "express";
+import { TypedRequest, requestContext, UnauthorizedError, logger } from "@mycompanyname/lib-common";
 import { LoginUserInput, LoginUserOutput } from "./types";
 import { RegisterUserInput, RegisterUserOutput } from "./types";
+import { UserProfile } from "./types";
 
 import * as userService from "./users.service";
 
@@ -44,6 +45,42 @@ export async function loginUser(
     const input: LoginUserInput = req.body; // No 'as' needed - req.body is already typed as LoginUserInput
     const output: LoginUserOutput = await userService.login(input);
     res.status(200).json(output);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /users/me
+ * Returns the authenticated user's profile (test endpoint to verify JWT middleware).
+ * 
+ * Notes:
+ * - This endpoint is PROTECTED. A valid JWT must be provided in the Authorization header.
+ * - JWT middleware (app-level with publicRoutes) enforces authentication.
+ * - This is a test endpoint that returns userId and userRole from request context.
+ * - Errors → errorMiddleware (UnauthorizedError if not authenticated)
+ */
+export async function getUserProfile(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    // Get userId and role from request context (set by JWT auth middleware)
+    const userId = requestContext.getUserId();
+    const userRole = requestContext.getUserRole();
+    
+    // Log to verify JWT middleware populated context correctly
+    logger.info("getUserProfile - JWT context verified", {
+      userId,
+      userRole,
+    }); 
+    
+    // Return response with context data for testing
+    res.status(200).json({
+      userId,
+      userRole,
+    });
   } catch (err) {
     next(err);
   }
