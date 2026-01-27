@@ -41,16 +41,16 @@ userRouter.post(
 
 /**
  * GET /users/me
- * Returns the authenticated user's profile (test endpoint to verify JWT middleware).
+ * Returns the authenticated user's profile.
  *
- * Flow: Request → JWT Auth Middleware (app-level) → Controller
- * Errors → errorMiddleware (UnauthorizedError if not authenticated)
+ * Flow: Request → JWT Auth Middleware (app-level) → Controller → Service → Repository
+ * Errors → errorMiddleware (UnauthorizedError if not authenticated, NotFoundError if user doesn't exist)
  *
  * Notes:
  * - This route is PROTECTED. A valid JWT must be provided in the Authorization header.
  * - App-level jwtAuthMiddleware({ publicRoutes }) handles authentication.
  * - This route is NOT in publicRoutes, so authentication is required automatically.
- * - This is a test endpoint that returns userId and userRole from request context.
+ * - Returns user profile (email, role, createdAt) - excludes sensitive fields like passwordHash.
  */
 userRouter.get(
   '/me',

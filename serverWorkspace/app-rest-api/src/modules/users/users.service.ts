@@ -1,13 +1,17 @@
-import { hash, compare } from "bcrypt";
-import { sign } from "jsonwebtoken";
-import { BadRequestError, ConflictError, UnauthorizedError } from "@mycompanyname/lib-common";
-import { RegisterUserInput, RegisterUserOutput } from "./types";
-import { LoginUserInput, LoginUserOutput } from "./types";
-import { UserErrorCode } from "./users.error.codes";
+
 import * as userRepo from "./users.repository";
 import { UserEntity } from "./types/user.entity";
 
-// Password hashing configuration
+import { RegisterUserInput, RegisterUserOutput } from "./types";
+import { LoginUserInput, LoginUserOutput } from "./types";
+import { UserProfile } from "./types/user.profile.model";
+import { UserErrorCode } from "./users.error.codes";
+
+import { BadRequestError, ConflictError, UnauthorizedError, NotFoundError } from "@mycompanyname/lib-common";
+import { hash, compare } from "bcrypt";
+import { sign } from "jsonwebtoken";
+
+// Password hashing configuration 
 const SALT_ROUNDS = 10;
 
 /**
@@ -116,12 +120,11 @@ export async function register(input: RegisterUserInput): Promise<RegisterUserOu
  */
 export async function login(input: LoginUserInput): Promise<LoginUserOutput>{
     
-  // BL: Validate JWT_SECRET is configured
+    // BL: Validate JWT_SECRET is configured
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET || JWT_SECRET.length < 32) {
         throw new Error(
-            "JWT_SECRET is not configured or is too short. " +
-            "Please set JWT_SECRET in .env file (minimum 32 characters)."
+            "JWT_SECRET is not configured or is too short. Please set JWT_SECRET in .env file (minimum 32 characters)."
         );
     }
 
@@ -168,4 +171,40 @@ export async function login(input: LoginUserInput): Promise<LoginUserOutput>{
         accessToken,
         expiresIn: JWT_EXPIRES_IN,
     };
+}
+
+/**
+ * Operation: Get user profile
+ * 
+ * @param userId - User ID (UUID) extracted from JWT token
+ * @returns User profile (email, role, createdAt) - excludes sensitive fields like passwordHash
+ * @throws NotFoundError if user with the given ID does not exist
+ * 
+ * Note: User authentication is handled by JWT middleware (userId extracted from token).
+ *       Any authenticated user can view their own profile (no role-based authorization needed).
+
+ * @example
+ * const profile = await getUserProfile("123e4567-e89b-12d3-a456-426614174000");
+ * // Returns: { email: "user@example.com", role: "listener", createdAt: "2024-01-01T00:00:00.000Z" }
+ */
+export async function getUserProfile(userId: string): Promise<UserProfile> {
+    // BL: Find user by ID
+    const user: UserEntity | null = await userRepo.findById(userId);
+    
+    // BL: Validate user exists
+    if (!user) {
+        throw new NotFoundError(
+            UserErrorCode.USER_NOT_FOUND,
+            `User with id ${userId} not found`
+        );
+    }
+    
+    // BL: Map entity to Model (exclude sensitive fields like passwordHash and id)
+    // Convert createdAt Date to ISO string format
+    const result : UserProfile = {
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt.toISOString(),
+    };
+    return result;
 }
