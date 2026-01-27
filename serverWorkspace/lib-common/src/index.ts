@@ -56,3 +56,6 @@ export { requestLoggerMiddleware } from "./app/express.middlewares";
 
 // Line below allows: import { errorMiddleware } from "@server/lib-common";
 export { errorMiddleware } from "./app/express.middlewares";
+
+// Line below allows: import { requireRole } from "@server/lib-common";
+export { requireRole } from "./utils/security/authorization";

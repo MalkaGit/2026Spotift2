@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { TypedRequest, requestContext, UnauthorizedError, logger } from "@mycompanyname/lib-common";
+import { TypedRequest, requestContext, UnauthorizedError, logger, requireRole } from "@mycompanyname/lib-common";
 import { LoginUserInput, LoginUserOutput } from "./types";
 import { RegisterUserInput, RegisterUserOutput } from "./types";
 import { UserProfile } from "./types";
@@ -66,6 +66,11 @@ export async function getUserProfile(
   next: NextFunction
 ) {
   try {
+
+    //example of using requireRole utility function
+    //can be called in any layer, usually in the service layer
+    requireRole(['listener']);
+    
     // Get userId and role from request context (set by JWT auth middleware)
     const userId = requestContext.getUserId();
     const userRole = requestContext.getUserRole();
