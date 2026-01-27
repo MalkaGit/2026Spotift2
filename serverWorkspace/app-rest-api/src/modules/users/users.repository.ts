@@ -3,6 +3,26 @@ import { logger } from "@mycompanyname/lib-common";
 import { randomUUID } from "crypto";
 import { UserEntity } from "./types/user.entity";
 
+
+/**
+ * Helper function to map database row (snake_case) to UserEntity (camelCase)
+ * This is necessary because the database returns snake_case fields
+ * but our domain model uses camelCase
+ * 
+ * @param dbRow - Database row with snake_case fields
+ * @returns UserEntity with camelCase fields
+ */
+function mapRowToUserEntity(dbRow: any): UserEntity {
+  return {
+    id: dbRow.id,
+    email: dbRow.email,
+    passwordHash: dbRow.password_hash,
+    role: dbRow.role,
+    // MySQL returns TIMESTAMP as Date object, ensure it's a Date
+    createdAt: dbRow.created_at instanceof Date ? dbRow.created_at : new Date(dbRow.created_at),
+  };
+}
+
 /**
  * Register a new user in the database
  * 
@@ -20,7 +40,7 @@ export async function registerUser(email: string, passwordHash: string, role: st
   const sql = `INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)`;
   const params = [id, email, passwordHash, role];
   
-  logger.debug("createUser - SQL query", { sql, params: [id, email, '[REDACTED]', role] });
+  logger.debug("registerUser - SQL query", { sql, params: [id, email, '[REDACTED]', role] });
   await mysqlPool.query(sql, params);
   
   return id;
@@ -75,15 +95,33 @@ export async function findByEmail(email: string): Promise<UserEntity | null> {
     return null;
   }
   
-  // Map database result (snake_case) to UserEntity (camelCase)
-  // This is necessary because the database returns snake_case fields
-  // but our domain model uses camelCase
-  const dbRow = result[0];
-  return {
-    id: dbRow.id,
-    email: dbRow.email,
-    passwordHash: dbRow.password_hash,
-    role: dbRow.role,
-    createdAt: dbRow.created_at,
-  };
+  return mapRowToUserEntity(result[0]);
+}
+
+/**
+ * Find a user by ID
+ * 
+ * @param id - User ID (UUID) to find
+ * @returns UserEntity if found, null otherwise
+ * @throws Database errors may be thrown (handled by error middleware)
+ * 
+ * @example
+ * const user = await findById("123e4567-e89b-12d3-a456-426614174000");
+ * if (user) {
+ *   return user;
+ * }
+ */
+export async function findById(id: string): Promise<UserEntity | null> {
+  const sql = `SELECT id, email, password_hash, role, created_at FROM users WHERE id = ? LIMIT 1`;
+  const params = [id];
+  
+  logger.debug("findById - SQL query", { sql, params });
+  const [rows] = await mysqlPool.query(sql, params);
+  const result = rows as any[];
+  
+  if (result.length === 0) {
+    return null;
+  }
+  
+  return mapRowToUserEntity(result[0]);
 }
