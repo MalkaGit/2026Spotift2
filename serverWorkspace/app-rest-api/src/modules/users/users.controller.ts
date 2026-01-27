@@ -58,26 +58,14 @@ export async function loginUser(
  * - This endpoint is PROTECTED. A valid JWT must be provided in the Authorization header.
  * - Errors → errorMiddleware (UnauthorizedError if not authenticated, NotFoundError if user doesn't exist)
  */
-export async function getUserProfile(
+export async function getMe(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    // Get userId from request context (set by JWT auth middleware)
-    // Defensive check: JWT middleware should have set userId, but we validate to prevent runtime errors
-    const userId = requestContext.getUserId();
-    if (!userId) {
-      // This should not happen if JWT middleware is properly configured
-      // But we handle it defensively to provide a clear error message
-      throw new UnauthorizedError(
-        "Authentication required. User ID not found in request context."
-      );
-    }
-    
-    // Call service to get user profile
-    const profile: UserProfile = await userService.getUserProfile(userId);
-    
+      
+    const profile: UserProfile = await userService.getMe();
     res.status(200).json(profile);
   } catch (err) {
     next(err);
