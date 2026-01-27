@@ -9,3 +9,9 @@ export { RegisterUserInput } from "./user.register.input";
 export { RegisterUserOutput } from "./user.register.output";
 export { registerUserSchema } from "./user.register.input.schema";
 
+export { LoginUserInput } from "./user.login.input";
+export { LoginUserOutput } from "./user.login.output";
+export { loginUserSchema } from "./user.login.input.schema";
+
+export { UserProfile } from "./user.profile.model";
+
