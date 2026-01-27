@@ -1,30 +1,5 @@
-=============================================
-how to develop: register user
-=============================================
--we created project from template 2026Learning
--creare users table in  my sql table 
-    see in repositry
--create thye users.types in app-rest-api\src\modules\users\types 
-    user.register.input.schema.ts
-    user.register.input.ts
-    user.register.output.schema.ts
-    index.ts
--implement the respository
--implement error codes
--inplement service
--implement controller
--implement router
--export router and use it in the app
-add env file
 
-go over files, fo npm install XXX as needed
-build as above
-test as below
-
-
-
-
-=============================================
+============================================
 how to run this template
 =============================================
 cd to the serverWorkspace
