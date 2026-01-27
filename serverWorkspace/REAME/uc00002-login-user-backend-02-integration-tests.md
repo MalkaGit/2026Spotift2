@@ -1,5 +1,5 @@
 =============================================
-how to develop: register user
+how to develop: register user - not sure it belongs here
 =============================================
 -create the users.types in      
     app-rest-api\src\modules\users\types 

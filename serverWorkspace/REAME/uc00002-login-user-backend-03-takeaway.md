@@ -1,3 +1,4 @@
+TODO: go over
 HLD
 1. simplicity
    -monolith
