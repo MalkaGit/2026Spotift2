@@ -15,14 +15,14 @@
  * 
  * Flow:
  *  → request-context middleware              (correlation id is required for logging. it extract correletion id from request header , if exist. writes it to new request context and to response header)
- *  → auth middleware                         (extracts user if from request context and writes it to the request context and to response header)
+ *  → JWT auth middleware getting list of public endpoints that donot require authentication 
  *  → request validation middleware           (parse string request into typed request object and store the typed values on the request)
  *  → router                                  (handles the request and returns the response)
  *  → controller                              (handles the request and returns the response)
  *  → service                                 (handles the business logic)
  *  → repository                              (handles the data access - not implemented yet)
  *  → response sent                           (writes the response to the response object)
- *  → request logging middleware logs summary (logs the request summary)
+ *  → request logging middleware logs summary (logs the request summary - can read userId from context set by JWT middleware above)
  *  → error handler middleware                (logs the errors if needed)
  * 
  * Dependencies:
@@ -33,9 +33,9 @@
 
 
 import express from "express";
-import {requestContextMiddleware} from "@mycompanyname/lib-common";
-import {authMiddleware} from "@mycompanyname/lib-common";
-import {requestLoggerMiddleware} from "@mycompanyname/lib-common";
+import { requestContextMiddleware } from "@mycompanyname/lib-common";
+import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
+import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
 
@@ -46,14 +46,30 @@ app.use(requestContextMiddleware);
 // Parse JSON request bodies
 app.use(express.json());
 
-// Authentication middleware - extracts user ID from x-user-id header
-// Set to required: false to allow public endpoints like /users/register
-app.use(authMiddleware({ required: false }));
+// Define public routes that don't require authentication
+// These routes will skip JWT verification entirely (even if token is present)
+// This list is checked at the beginning of JWT middleware to avoid unnecessary processing
+const publicRoutes = [
+  { method: 'GET', path: '/health' },
+  { method: 'POST', path: '/users/register' },
+  { method: 'POST', path: '/users/login' },
+];
+
+// JWT Authentication middleware - required by default (secure by default)
+// Verifies JWT token from Authorization: Bearer <token> header
+// Extracts userId and role from token and stores in request context
+// This keeps the app simple & explicit: public routes stay public by default,
+// protected routes clearly declare that a valid JWT is required.
+app.use(jwtAuthMiddleware({ publicRoutes }));
 
 // Request logging middleware - logs request summary after response is sent
+// IMPORTANT: This runs AFTER JWT middleware above, so it can read userId from request context
+// The middleware listens to response 'finish' event, so it has access to context set by JWT middleware
 app.use(requestLoggerMiddleware);
 
 // Health check endpoint (used by load balancers, Kubernetes, ECS, monitoring tools)
+// This is a public endpoint (no authentication required).
+// Defined in publicRoutes array above, so JWT middleware skips it entirely.
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });

@@ -32,8 +32,8 @@ export const UserErrorCode = {
     // ConflictError codes (409)
     USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
     
-    // NotFoundError codes (404) - for future use
-    // USER_NOT_FOUND: "USER_NOT_FOUND",
+    // NotFoundError codes (404)
+    USER_NOT_FOUND: "USER_NOT_FOUND",
   } as const;
   
   // Type for TypeScript autocomplete and type checking
