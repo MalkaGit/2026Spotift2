@@ -59,3 +59,6 @@ export { errorMiddleware } from "./app/express.middlewares";
 
 // Line below allows: import { requireRole } from "@server/lib-common";
 export { requireRole } from "./utils/security/authorization";
+
+// Line below allows: import { requireAuthenticated } from "@server/lib-common";
+export { requireAuthenticated } from "./utils/security/authentication";
