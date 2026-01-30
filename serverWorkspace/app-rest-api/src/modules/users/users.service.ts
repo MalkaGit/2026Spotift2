@@ -7,7 +7,7 @@ import { LoginUserInput, LoginUserOutput } from "./types";
 import { UserProfile } from "./types/user.profile.model";
 import { UserErrorCode } from "./users.error.codes";
 
-import { BadRequestError, ConflictError, UnauthorizedError, NotFoundError, requestContext } from "@mycompanyname/lib-common";
+import { BadRequestError, ConflictError, UnauthorizedError, NotFoundError, requestContext, requireAuthenticated } from "@mycompanyname/lib-common";
 import { hash, compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
 
@@ -188,15 +188,12 @@ export async function login(input: LoginUserInput): Promise<LoginUserOutput>{
  */
 export async function getMe(): Promise<UserProfile> {
     
-     // Get userId from request context (set by JWT auth middleware)
-    const userId = requestContext.getUserId();
-    if (!userId) {
-      // This should not happen if JWT middleware is properly configured
-      // But we handle it defensively to provide a clear error message
-      throw new UnauthorizedError(
-        "Authentication required. User ID not found in request context."
-      );
-    }
+    //BL: Authentication - user must be authenticated
+    requireAuthenticated();
+    
+    // Get userId from request context (guaranteed to be string after requireAuthenticated)
+    const userId: string = requestContext.getUserId()!;
+    
     // BL: Find user by ID
     const user: UserEntity | null = await userRepo.findById(userId);
     

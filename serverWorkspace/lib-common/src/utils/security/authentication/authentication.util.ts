@@ -32,7 +32,7 @@
  * Usage:
  *    - Basic usage in service:
  *      requireAuthenticated();
- *      const userId = requestContext.getUserId(); // Guaranteed to be string after requireAuthenticated
+ *      const userId = requestContext.getUserId()!; // Guaranteed to be string after requireAuthenticated
  *      await userRepo.findById(userId);
  * 
  *    - When you only need authentication (no role check):
