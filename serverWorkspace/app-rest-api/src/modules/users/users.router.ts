@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { createRequestValidator, jwtAuthMiddleware } from "@mycompanyname/lib-common";
-import { registerUserSchema, loginUserSchema } from "./types";
+
 import * as userController from "./users.controller";
+import { registerUserSchema, loginUserSchema } from "./types";
+
+import * as likesController from "../likes/likes.controller";
+import { AddLikeInputSchema } from "../likes/types";
 
 const userRouter = Router();
 
@@ -55,6 +59,26 @@ userRouter.post(
 userRouter.get(
   '/me',
   userController.getMe
+);
+
+/**
+ * POST /users/me/likes
+ * Adds a like for the current user.
+ *
+ * Flow: Request → Validation Middleware → JWT Auth Middleware (app-level) → Controller → Service → Repository
+ * Errors → errorMiddleware (UnauthorizedError if not authenticated, ConflictError if already liked)
+ *
+ * Notes:
+ * - This route is PROTECTED. A valid JWT must be provided in the Authorization header.
+ * - App-level jwtAuthMiddleware({ publicRoutes }) handles authentication.
+ * - This route is NOT in publicRoutes, so authentication is required automatically.
+ * - Only users with "listener" role can add likes (enforced in service layer).
+ * - This route calls the likes controller (cross-domain routing).
+ */
+userRouter.post(
+  '/me/likes',
+  createRequestValidator({ body: AddLikeInputSchema }),
+  likesController.addLike
 );
 
 export default userRouter;
