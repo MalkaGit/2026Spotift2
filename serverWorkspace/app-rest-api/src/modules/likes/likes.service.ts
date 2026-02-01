@@ -4,6 +4,7 @@ import { requireRole, requestContext } from "@mycompanyname/lib-common";
 import { ConflictError, NotFoundError } from "@mycompanyname/lib-common";
 
 import { AddLikeInput, AddLikeOutput } from "./types";
+import {QueryLikesInput, LikesItem } from "./types";
 
 /**
  * Operation: Add a like for the current user
@@ -59,4 +60,43 @@ export async function addLike(input: AddLikeInput): Promise<AddLikeOutput> {
     const result = await likesRepo.addLike(userId, input);
     
     return result;
+}
+
+
+/**
+ * Operation: Query likes for a user
+ * 
+ * Note: Structural validation (defaults, required fields, enum values, number ranges) is handled by request validation middleware.
+ * 
+ * @param userId - User ID (UUID) of the user whose likes to query
+ * @param query - Query input containing pagination and sorting parameters
+ * @param query.offset - Number of records to skip (default: 0)
+ * @param query.limit - Maximum number of records to return (default: 20)
+ * @param query.sort - Field to sort by: 'created_at' (default) or 'name'
+ * @param query.direction - Sort direction: 'asc' or 'desc' (default: 'desc')
+ * @returns Array of like items for the specified user (excludes likes where entity has been deleted)
+ * @throws UnauthorizedError (401) if user is not authenticated
+ * @throws ForbiddenError (403) if user is authenticated but not authorized (listener role required)
+ * 
+ * @example
+ * const result = await queryLikesByUser("123e4567-e89b-12d3-a456-426614174000", {
+ *   offset: 0,
+ *   limit: 20,
+ *   sort: 'created_at',
+ *   direction: 'desc'
+ * });
+ * // Returns: [{ id: "...", likedEntityType: "artist", likedEntityId: "...", likedEntityName: "Artist Name", createdAt: "..." }, ...]
+ */
+export async function queryLikesByUser(
+  userId: string,
+  query: QueryLikesInput
+): Promise<LikesItem[]> {
+  
+  //BL: Authentication & Authorization - user must be authenticated and have listener role
+  requireRole(["listener"]);
+  
+  //BL: Query user's likes with pagination and sorting
+  const items :LikesItem[] = await likesRepo.queryLikesByUser(userId, query);
+  
+  return items;
 }

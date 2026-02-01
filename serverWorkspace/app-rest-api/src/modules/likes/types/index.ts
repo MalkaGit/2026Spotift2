@@ -9,3 +9,6 @@ export { LikedEntityType, LIKED_ENTITY_TYPES } from "./liked.entity.type";
 export { AddLikeInput } from "./likes.add.like.input.model";
 export { AddLikeOutput } from "./likes.add.like.output";
 export { AddLikeInputSchema } from "./likes.add.like.input.schema";
+export { LikesItem  } from "./likes.item.model";
+export { QueryLikesInput } from "./query.likes.input.model";
+export { QueryLikesInputSchema } from "./query.likes.input.schema";
