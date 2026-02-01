@@ -1,4 +1,4 @@
-import { LikedEntityType } from "./liked.entity.type";
+import { LikedEntityType } from "./likes.entity.type";
 
 /**
  * LikeItem represents a single liked entity in the  likes list.

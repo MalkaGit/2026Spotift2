@@ -1,4 +1,4 @@
-import { LikedEntityType } from "./liked.entity.type";
+import { LikedEntityType } from "./likes.entity.type";
 
 /**
  * Input type for add user like operation
