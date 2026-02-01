@@ -1,3 +1,18 @@
+root
+Aa12345678!
+--  ========================================
+--  users TABLE (user manages many artists)
+--  ======================================== 
+use  spotify2db;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+  id CHAR(36) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 
@@ -25,27 +40,33 @@ CREATE INDEX idx_artist_name ON artists(name);
 CREATE INDEX idx_artist_user ON artists(user_id);
 
 
+
+
+
+
+
+
 INSERT INTO artists (id, user_id, name, bio)
 VALUES
-('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Taylor Swift', 'American singer-songwriter'),
+('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter'),
 
-('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Drake', 'Canadian rapper and singer'),
+('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Drake', 'Canadian rapper and singer'),
 
-('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Ed Sheeran', 'English pop singer-songwriter'),
+('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ed Sheeran', 'English pop singer-songwriter'),
 
-('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Beyoncé', 'American singer and performer'),
+('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Beyoncé', 'American singer and performer'),
 
-('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Eminem', 'American rapper and producer'),
+('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Eminem', 'American rapper and producer'),
 
-('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Ariana Grande', 'American pop and R&B singer'),
+('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ariana Grande', 'American pop and R&B singer'),
 
-('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Imagine Dragons', 'American pop rock band'),
+('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Imagine Dragons', 'American pop rock band'),
 
-('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Rihanna', 'Barbadian singer and entrepreneur'),
+('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Rihanna', 'Barbadian singer and entrepreneur'),
 
-('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'The Weeknd', 'Canadian R&B singer'),
+('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'The Weeknd', 'Canadian R&B singer'),
 
-('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'Metallica', 'American heavy metal band');
+('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Metallica', 'American heavy metal band');
 
 
 
@@ -53,11 +74,11 @@ VALUES
 
 
 ========================================================
---  user_likes TABLE (artist\album\playlists has many likes)
+--  likes TABLE (artist\album\playlists has many likes)
 --  ======================================================== 
-DROP TABLE IF EXISTS user_likes;
+DROP TABLE IF EXISTS likes;
 
-CREATE TABLE user_likes (
+CREATE TABLE likes (
   id CHAR(36) NOT NULL PRIMARY KEY,                   -- unique like ID
   user_id CHAR(36) NOT NULL,                                 -- FK → users.id
   entity_type VARCHAR(32) NOT NULL,                  -- type of entity (artist, album, playlist, etc.)
@@ -74,22 +95,46 @@ CREATE TABLE user_likes (
 
 
 -- Quickly fetch all likes of a user
-CREATE INDEX idx_likes_user ON user_likes(user_id);
+CREATE INDEX idx_likes_user ON likes(user_id);
 
 --  Sort likes by creation time per user (pagination by created_at)
-CREATE INDEX idx_likes_user_created ON user_likes(user_id, created_at DESC);
+CREATE INDEX idx_likes_user_created ON likes(user_id, created_at DESC);
 
 --  Quickly count or fetch likes for a specific entity
-CREATE INDEX idx_likes_entity ON user_likes(entity_type, entity_id);
+CREATE INDEX idx_likes_entity ON likes(entity_type, entity_id);
 
  
 --Insert Example
+with postman 
 
---INSERT INTO user_likes (id, user_id, entity_type, entity_id)
---VALUES
---('like-1', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'artist', 'artist-1'),
---('like-2', '000f0e50-c1c2-4b56-a331-eba6bd9b9db9', 'artist', 'artist-2'),
---('like-3', '47e3f0fd-ea37-4b45-9894-b9779bd670df', 'artist', 'artist-3');
+
+
+
+
+
+
+--  ========================================
+--  ALBUMS TABLE (user manages many artists)
+--  ======================================== 
+
+DROP TABLE IF EXISTS albums;
+
+CREATE TABLE albums (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+   name VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+ 
+--  ========================================
+--  PLAYLISTS TABLE (user manages many artists)
+--  ======================================== 
+
+DROP TABLE IF EXISTS playlists;
+
+CREATE TABLE playlists (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+   name VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+ 
 
  
 

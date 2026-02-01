@@ -5,7 +5,7 @@ import * as userController from "./users.controller";
 import { registerUserSchema, loginUserSchema } from "./types";
 
 import * as likesController from "../likes/likes.controller";
-import { AddLikeInputSchema } from "../likes/types";
+import { AddLikeInputSchema, QueryLikesInputSchema } from "../likes/types";
 
 const userRouter = Router();
 
@@ -79,6 +79,26 @@ userRouter.post(
   '/me/likes',
   createRequestValidator({ body: AddLikeInputSchema }),
   likesController.addLike
+);
+
+/**
+ * GET /users/me/likes
+ * Returns the authenticated user's likes with pagination and sorting, without orphaned likes 
+ *
+ * Flow: Request → Validation Middleware → JWT Auth Middleware (app-level) → Controller → Service → Repository
+ * Errors → errorMiddleware (UnauthorizedError if not authenticated)
+ *
+ * Notes:
+ * - This route is PROTECTED. A valid JWT must be provided in the Authorization header.
+ * - App-level jwtAuthMiddleware({ publicRoutes }) handles authentication.
+ * - This route is NOT in publicRoutes, so authentication is required automatically.
+ * - Supports query parameters: offset, limit, sort, direction (validated by QueryLikesInputSchema).
+ * - This route calls the likes controller (cross-domain routing).
+ */
+userRouter.get(
+  '/me/likes',
+  createRequestValidator({ query: QueryLikesInputSchema }),
+  likesController.queryMyLikes
 );
 
 export default userRouter;
