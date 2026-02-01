@@ -5,7 +5,7 @@
  * It follows the same pattern as the users module.
  */
 
-export { LikedEntityType, LIKED_ENTITY_TYPES } from "./liked.entity.type";
+export { LikedEntityType, LIKED_ENTITY_TYPES } from "./likes.entity.type";
 export { AddLikeInput } from "./add.like.input.model";
 export { AddLikeOutput } from "./add.like.output";
 export { AddLikeInputSchema } from "./add.like.input.schema";

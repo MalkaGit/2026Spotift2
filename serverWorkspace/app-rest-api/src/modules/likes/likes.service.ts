@@ -7,10 +7,12 @@ import { AddLikeInput, AddLikeOutput } from "./types";
 import {QueryLikesInput, LikesItem } from "./types";
 
 /**
- * Operation: Add a like for the current user
+ * Operation: Add a like for a user
  * 
+ * Note: User authentication is handled by JWT middleware (userId extracted from token).
  * Note: Structural validation (required fields, entityType enum, entityId UUID format) is handled by request validation middleware.
  * 
+ * @param userId - User ID (UUID) of the user adding the like
  * @param input - Like input containing entityType and entityId
  * @param input.entityType - Type of entity being liked (artist, album, or playlist)
  * @param input.entityId - ID of the entity being liked (must be valid UUID)
@@ -20,16 +22,15 @@ import {QueryLikesInput, LikesItem } from "./types";
  * @throws NotFoundError if the entity (artist, album, or playlist) does not exist. 
  * @throws ConflictError if user has already liked this entity
  * 
- * Note: User authentication is handled by JWT middleware (userId extracted from token).
  * 
  * @example
- * const result = await addLike({
+ * const result = await addLike("123e4567-e89b-12d3-a456-426614174000", {
  *   entityType: "artist",
  *   entityId: "artist-1"
  * });
  * // Returns: { id: "like-uuid-here" }
  */
-export async function addLike(input: AddLikeInput): Promise<AddLikeOutput> {
+export async function addLike(userId: string, input: AddLikeInput): Promise<AddLikeOutput> {
     
     //BL: Authentication & Authorization - user must be authenticated and have listener role
     requireRole(["listener"]);
@@ -44,8 +45,6 @@ export async function addLike(input: AddLikeInput): Promise<AddLikeOutput> {
             `${input.entityType} with id ${input.entityId} not found`
         );
     }
-
-    const userId: string = requestContext.getUserId()!;
 
     //BL: Check if user has already liked this entity
     const alreadyLiked = await likesRepo.exists(userId, input.entityType, input.entityId);
