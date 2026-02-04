@@ -27,13 +27,17 @@ CREATE TABLE artists (
   user_id CHAR(36) NOT NULL,--the user that manage the artist data
   name VARCHAR(255) NOT NULL,
   bio TEXT,
+  image_url VARCHAR(512), -- URL to artist image/photo
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_artist_user FOREIGN KEY (user_id)
     REFERENCES users(id) ON DELETE CASCADE --when user deleted, the Artists it manages are deleted
 ) ENGINE=InnoDB;
 
 -- when user deleted, the artirst it manages are deleted as well
---  Quickly search artists by name, migh5 help reading favorites by name
+-- Full-text search index on name for fast text search (used by search/v2)
+CREATE FULLTEXT INDEX idx_artist_name_ft ON artists(name);
+
+-- Regular index for LIKE-based search (used by search/v1) and sorting
 CREATE INDEX idx_artist_name ON artists(name);
 
 -- Fetch all artists of a given user
@@ -46,27 +50,27 @@ CREATE INDEX idx_artist_user ON artists(user_id);
 
 
 
-INSERT INTO artists (id, user_id, name, bio)
+INSERT INTO artists (id, user_id, name, bio, image_url)
 VALUES
-('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter'),
+('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png/256px-191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png'),
 
-('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Drake', 'Canadian rapper and singer'),
+('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Drake', 'Canadian rapper and singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Drake_-_OVO_Fest_2018_%2848634431131%29_%28cropped%29.jpg/256px-Drake_-_OVO_Fest_2018_%2848634431131%29_%28cropped%29.jpg'),
 
-('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ed Sheeran', 'English pop singer-songwriter'),
+('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ed Sheeran', 'English pop singer-songwriter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Ed_Sheeran_%288508047844%29.jpg/256px-Ed_Sheeran_%288508047844%29.jpg'),
 
-('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Beyoncé', 'American singer and performer'),
+('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Beyoncé', 'American singer and performer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png/256px-Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png'),
 
-('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Eminem', 'American rapper and producer'),
+('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Eminem', 'American rapper and producer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Eminem_-_Concert_for_Valor%2C_Washington%2C_D.C._Nov._11%2C_2014_%282%29_%28Cropped%29.jpg/256px-Eminem_-_Concert_for_Valor%2C_Washington%2C_D.C._Nov._11%2C_2014_%282%29_%28Cropped%29.jpg'),
 
-('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ariana Grande', 'American pop and R&B singer'),
+('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ariana Grande', 'American pop and R&B singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/20200629_Ariana_Grande_White_House_%28cropped%29.jpg/256px-20200629_Ariana_Grande_White_House_%28cropped%29.jpg'),
 
-('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Imagine Dragons', 'American pop rock band'),
+('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Imagine Dragons', 'American pop rock band', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Imagine_Dragons_2017_%28cropped%29.jpg/256px-Imagine_Dragons_2017_%28cropped%29.jpg'),
 
-('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Rihanna', 'Barbadian singer and entrepreneur'),
+('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Rihanna', 'Barbadian singer and entrepreneur', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Rihanna_Fenty_2018.png/256px-Rihanna_Fenty_2018.png'),
 
-('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'The Weeknd', 'Canadian R&B singer'),
+('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'The Weeknd', 'Canadian R&B singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/The_Weeknd_%2848448443451%29_%28cropped%29.jpg/256px-The_Weeknd_%2848448443451%29_%28cropped%29.jpg'),
 
-('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Metallica', 'American heavy metal band');
+('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Metallica', 'American heavy metal band', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Metallica_Live_at_The_O2_Arena_London_2017_11_10_%284%29_%28cropped%29.jpg/256px-Metallica_Live_at_The_O2_Arena_London_2017_11_10_%284%29_%28cropped%29.jpg');
 
 
 
