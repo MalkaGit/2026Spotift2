@@ -1,5 +1,7 @@
 root
-Aa12345678!
+local: 1234
+create schena: spotify2db
+
 --  ========================================
 --  users TABLE (user manages many artists)
 --  ======================================== 
@@ -13,6 +15,7 @@ CREATE TABLE users (
   role VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- Note: it includes indexes
 
 
 
@@ -20,20 +23,21 @@ CREATE TABLE users (
 --  ARTISTS TABLE (user manages many artists)
 --  ======================================== 
 
+use  spotify2db;
 DROP TABLE IF EXISTS artists;
 
 CREATE TABLE artists (
   id CHAR(36) NOT NULL PRIMARY KEY,
-  user_id CHAR(36) NOT NULL,--the user that manage the artist data
+  user_id CHAR(36) NOT NULL,       -- the user that manage the artist data
   name VARCHAR(255) NOT NULL,
   bio TEXT,
-  image_url VARCHAR(512), -- URL to artist image/photo
+  image_url VARCHAR(512),          -- URL to artist image/photo
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_artist_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE --when user deleted, the Artists it manages are deleted
+    REFERENCES users(id) ON DELETE CASCADE 
+    -- cascade means that when user deleted, the Artists it manages are deleted autmatically by db in transaction
 ) ENGINE=InnoDB;
 
--- when user deleted, the artirst it manages are deleted as well
 -- Full-text search index on name for fast text search (used by search/v2)
 CREATE FULLTEXT INDEX idx_artist_name_ft ON artists(name);
 
@@ -48,8 +52,10 @@ CREATE INDEX idx_artist_user ON artists(user_id);
 
 
 
+-- INSERT ARTITST DATA  
+-- Note: it will fail on fk constraint. fix: change user id in the statements below
 
-
+use  spotify2db;
 INSERT INTO artists (id, user_id, name, bio, image_url)
 VALUES
 ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png/256px-191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png'),
@@ -76,26 +82,24 @@ VALUES
 
 
 
-
-========================================================
+-- ========================================================
 --  likes TABLE (artist\album\playlists has many likes)
 --  ======================================================== 
+use  spotify2db;
+
 DROP TABLE IF EXISTS likes;
 
 CREATE TABLE likes (
-  id CHAR(36) NOT NULL PRIMARY KEY,                   -- unique like ID
-  user_id CHAR(36) NOT NULL,                                 -- FK → users.id
-  entity_type VARCHAR(32) NOT NULL,                  -- type of entity (artist, album, playlist, etc.)
-  entity_id CHAR(36) NOT NULL,                             -- ID of liked entity, no fk and delete cascade
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- timestamp of like
-  UNIQUE KEY uq_like (user_id, entity_type, entity_id),--user can like same entity twice
+  id CHAR(36) NOT NULL PRIMARY KEY,                   	-- unique like ID
+  user_id CHAR(36) NOT NULL,                          	-- FK → users.id
+  entity_type VARCHAR(32) NOT NULL,                    	-- type of entity (artist, album, playlist, etc.)
+  entity_id CHAR(36) NOT NULL,                         	-- ID of liked entity, no fk and delete cascade
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,       -- timestamp of like
+  UNIQUE KEY uq_like (user_id, entity_type, entity_id), -- user can like same entity twice
   CONSTRAINT fk_like_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE -- fk, if user deleted it’s likes deleted automatically
+  REFERENCES users(id) ON DELETE CASCADE 				-- fk, you can not add like to user that dies not exist
+														-- Delete cascade: data integrity - if user deleted it’s likes deleted automatically by db in transaction
 ) ENGINE=InnoDB;
-
--- when user is deleted, delete cascase ensure its likes are dleted in transaction as well
--- when artis is deleted , we need to code transaction to delete it’s likes
-
 
 
 -- Quickly fetch all likes of a user
@@ -107,9 +111,14 @@ CREATE INDEX idx_likes_user_created ON likes(user_id, created_at DESC);
 --  Quickly count or fetch likes for a specific entity
 CREATE INDEX idx_likes_entity ON likes(entity_type, entity_id);
 
- 
---Insert Example
-with postman 
+-- Note: likes table does not have fk to aritis,album,tranck,playlist but only entity id
+-- so, when artis is deleted , db does not delete its likes automatically in transction
+-- to void having orphans (likes pointing to artits that do not exist)
+-- the code has to handle delete in transaction, so when parent (aritist) is deleted
+-- we remove it’s children (likes) in transaction to ensure consistncy and avoid having orphans
+
+
+
 
 
 
@@ -120,23 +129,25 @@ with postman
 --  ========================================
 --  ALBUMS TABLE (user manages many artists)
 --  ======================================== 
-
+use  spotify2db;
 DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
   id CHAR(36) NOT NULL PRIMARY KEY,
-   name VARCHAR(255) NOT NULL
+  name VARCHAR(255) NOT NULL,
+  image_url VARCHAR(512)          -- URL to artist image/photo
 ) ENGINE=InnoDB;
  
 --  ========================================
 --  PLAYLISTS TABLE (user manages many artists)
 --  ======================================== 
-
+use  spotify2db;
 DROP TABLE IF EXISTS playlists;
 
 CREATE TABLE playlists (
   id CHAR(36) NOT NULL PRIMARY KEY,
-   name VARCHAR(255) NOT NULL
+  name VARCHAR(255) NOT NULL,
+  image_url VARCHAR(512)          -- URL to artist image/photo
 ) ENGINE=InnoDB;
  
 
