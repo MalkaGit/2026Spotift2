@@ -33,6 +33,7 @@
 
 
 import express from "express";
+import cors from "cors";
 import { requestContextMiddleware } from "@mycompanyname/lib-common";
 import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
 import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
@@ -44,6 +45,9 @@ import { searchRouter as searchV2Router } from "./modules/search/v2";
 const app = express();
 
 app.use(requestContextMiddleware);
+
+// CORS: allow frontend (e.g. http://localhost:5173) to call this API
+app.use(cors({ origin: true, credentials: true }));
 
 // Parse JSON request bodies
 app.use(express.json());
