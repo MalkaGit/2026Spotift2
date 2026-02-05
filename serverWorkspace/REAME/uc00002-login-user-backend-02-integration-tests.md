@@ -73,9 +73,10 @@ CREATE TABLE users - already created
 Example1:
     POST 
     http://localhost:3000/users/login
+    Content-Type application/json
     {
-    "email": "email4@gmail.com",
-    "password":"aA123456789!"
+    "email": "email1@gmail.com",
+    "password":"Aa123456789"
     }
 
 result:
