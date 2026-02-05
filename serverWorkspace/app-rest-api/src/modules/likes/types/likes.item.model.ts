@@ -15,5 +15,7 @@ export interface LikesItem {
     likedEntityType: LikedEntityType;
     likedEntityId: string;
     likedEntityName: string;
+    /** Image URL for the entity (artist, album, or playlist) when available. */
+    likedEntityImageUrl?: string;
     createdAt: string;                 // ISO 8601 format
   }

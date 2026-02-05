@@ -15,12 +15,14 @@ import { randomUUID } from "crypto";
  * @returns LikesItem with proper types
  */
 function mapRowToLikesItem(dbRow: any): LikesItem {
+  const imageUrl = dbRow.likedEntityImageUrl;
   return {
     id: dbRow.id,
     likedEntityType: dbRow.likedEntityType as LikedEntityType,
     likedEntityId: dbRow.likedEntityId,
-    likedEntityName: dbRow.likedEntityName, // Entity name from joined table (always present due to query filter)
-    // MySQL returns TIMESTAMP as Date object, convert to ISO string
+    likedEntityName: dbRow.likedEntityName,
+    likedEntityImageUrl: imageUrl != null && imageUrl !== '' ? String(imageUrl) : undefined,
+    //MySQL returns TIMESTAMP as Date object, convert it to ISO 8601 format
     createdAt: dbRow.createdAt instanceof Date 
       ? dbRow.createdAt.toISOString() 
       : new Date(dbRow.createdAt).toISOString(),
@@ -199,6 +201,11 @@ export async function queryLikesByUser(
       l.entity_type AS likedEntityType,
       l.entity_id AS likedEntityId,
       COALESCE(artists.name, albums.name, playlists.name) AS likedEntityName,
+      CASE 
+        WHEN l.entity_type = 'artist' THEN artists.image_url
+        WHEN l.entity_type = 'album' THEN albums.image_url
+        WHEN l.entity_type = 'playlist' THEN playlists.image_url
+      END AS likedEntityImageUrl,
       l.created_at AS createdAt
     FROM likes l
     LEFT JOIN artists ON l.entity_type = 'artist' AND l.entity_id = artists.id
