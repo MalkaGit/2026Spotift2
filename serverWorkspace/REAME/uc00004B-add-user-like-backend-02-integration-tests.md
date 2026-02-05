@@ -1,4 +1,3 @@
-
 prep: login to get token 
 
 POST http://localhost:3000/users/login
@@ -6,7 +5,7 @@ Content-Type application/json
 body:
 {
     "email": "email4@gmail.com",
-    "password":"aA123456789!"
+    "password":"Aa123456789!"
 }
 response:
 200 OK
