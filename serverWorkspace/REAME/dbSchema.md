@@ -138,6 +138,46 @@ CREATE TABLE playlists (
 
  
 
+
+ USE spotify2db;
+
+-- Update by artist name so it works regardless of id (e.g. after re-seeding)
+-- Images: Wikipedia Commons (stable, free to use)
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'
+WHERE name = 'Taylor Swift';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'
+WHERE name = 'Drake';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'
+WHERE name = 'Ed Sheeran';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s'
+WHERE name = 'Beyoncé';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMtMZKiqJZMq26-kYYN56PvYECADkZG0pKCA&s'
+WHERE name = 'Eminem';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_GSsX68QVsi_k16pEKW0ExOCzhbk78JEQ8w&s'
+WHERE name = 'Ariana Grande';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJuFdDT2tn1xeF8x_4Y6DBmkTWMah5JrLogQ&s'
+WHERE name = 'Imagine Dragons';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMmGVcX-zXjjKWK5BqEFPitD4eYfMWHUartw&s'
+WHERE name = 'Rihanna';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s'
+WHERE name = 'The Weeknd';
+
+UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s'
+WHERE name = 'Metallica';
+
+-- Optional: more artists (add rows if you have these names in your DB)
+
+
+
  
 
  
