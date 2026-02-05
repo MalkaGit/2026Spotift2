@@ -18,8 +18,9 @@ export async function addLike(
   next: NextFunction
 ) {
   try {
-    const input: AddLikeInput = req.body; // No 'as' needed - req.body is already typed as AddLikeInput
-    const output: AddLikeOutput = await likesService.addLike(input);
+    const userId: string = requestContext.getUserId()!;                     // userId is guaranteed to be non-null because authentication middleware throws if unauthenticated
+    const input: AddLikeInput = req.body;                                   // No 'as' needed - req.body is already typed as AddLikeInput
+    const output: AddLikeOutput = await likesService.addLike(userId, input);
     res.status(201).json(output);
   } catch (err) {
     next(err);
