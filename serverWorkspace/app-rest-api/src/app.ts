@@ -33,17 +33,19 @@
 
 
 import express from "express";
+import cors from "cors";
 import { requestContextMiddleware } from "@mycompanyname/lib-common";
 import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
 import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
-import { searchRouter as searchV1Router } from "./modules/search/v1";
-import { searchRouter as searchV2Router } from "./modules/search/v2";
 
 const app = express();
 
 app.use(requestContextMiddleware);
+
+// CORS: allow frontend (e.g. http://localhost:5173) to call this API
+app.use(cors({ origin: true, credentials: true }));
 
 // Parse JSON request bodies
 app.use(express.json());
@@ -78,8 +80,6 @@ app.get("/health", (_req, res) => {
 
 // API Routes
 app.use("/users", usersRouter);
-app.use("/search/v1", searchV1Router);
-app.use("/search/v2", searchV2Router);
 
 // Error Middleware (MUST be last - catches all errors from routes above)
 app.use(errorMiddleware);
