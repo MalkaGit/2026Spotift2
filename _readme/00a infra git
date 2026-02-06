@@ -1,0 +1,137 @@
+
+===============================================
+### D per feature: 
+===============================================
+
+**Create feature branch**
+-cd `c:\dev\repos\node\2026Spotift2\serverWorkspace`
+-git branch
+-git switch `dev`                         --switch to the source branch
+-git pull origin `dev`                    --update the source branch on local disk
+-git switch -c `my-feature-branch-name`   --creates new local branch from the source brancch
+    feature/uc00001-user-story1A-operation1--add-like-operation---post-me-likes
+    feature/uc00001-user-story1B-operation2--add-like-operation---post-me-likes
+    feature/uc00001-user-story1C-screen1--XXX---YYY
+-git benach                               --see all branches, and new one starred
+
+
+**merge changes from cloud to my local feature branch (daily)**
+
+-git branch                                 --see all local branches
+-git switch `dev`                           --switch to the source branch
+-git pull origin `dev`                      --update the source branch on local disk
+
+-git branch                                 --see all local branches
+-git switch `my-feature-branch-name`        --switch to feature branch
+-git pull origin  `my-feature-branch-name`  --update the source branch on local disk
+
+-git status                                 --make sure you are on feature branch
+-git merge `dev`                            --merge the source branch into current feature branch
+
+
+
+**development: make changes in working directory, build and test**
+-git branch                                 --see all local branches
+-git switch `my-feature-branch-name`        --switch to feature branch
+
+
+**commit: working directory => stage => commit to local feature branch**
+-git branch                               --see all local branches
+-git switch `my-feature-branch-name`      --switch to feature branch
+-git status                               --see files working directory (unstaged)
+-for each file to commit
+ get add <filename>                       --move files form working directory to staging area
+ git status                               
+ -git commit -m "<branch name>:<chnage>"  --the staged files are commited to the branch locally
+        git commit -m "<branch name>: implementation (interfaces, BL, DAL)"
+        git commit -m "<branch name>: fix-"
+
+
+-git status                                 --staged files are no longer there
+-git log -n 5                               --see the commt
+
+
+**push: local feature branch to remote frature breanch**
+
+### pull the main (from remote to local)
+git branch
+git switch `dev`  
+git pull origin `dev`  
+git log -n 2
+
+### pull the feature branch (from remote to local)
+git branch
+git switch `my-feature-branch-name`  
+git pull origin `my-feature-branch-name`  
+git log -n 2
+
+### merge main into feature branch (locally) - to see if there are conflicts and handle them
+git branch
+git switch `my-feature-branch-name`  
+git merge `dev`                            --merge the lcoal main branch into local feature branch
+
+### handle any merge confilicts if we have and commit then in the local feature branch
+
+
+#### push:  push  chnanges from local feature branch into remote featire branch 
+git branch
+git switch `my-feature-branch-name`  
+git branch 
+git push origin  `my-feature-branch-name`   
+
+### create pull request & aprove it (merge feature branch to main branch)
+-open gitgub
+-select the repository (it sohuld open on  the main branch)
+-see the pull request
+-click: compare and pull request
+-click: create pull request
+-click: merge pull reuqest
+-click: confirm merge
+
+
+
+
+
+
+
+===============================================
+### A Terminilogy
+===============================================
+
+- **Repositry**:
+  - we create reposiotry for project (or POC)
+  - repositry has **main branch**, eg `dev` or  `main`.
+  - as we develop new feature:
+    A. create new  "**feature branch**" 
+    B. work locally on the feature branch  
+    C. commit changes to feature branch
+    D. push feature branch changes to remote feature branch
+    E. once feature approved, create "**pull request**" to merge feature branch into  **main branch**
+
+
+==============================================================
+### B One time per project: create new repository (for new project with specific stack)
+==============================================================
+
+1. login to github
+2. create new public\private repository 
+   - selecting the git ignore files
+
+===============================================
+### C One time per project: clone repositry (from git to my disk)
+===============================================
+
+1. **open gitub to find the clone url of the repository**
+2. **install git if needed**
+3. cd c:\dev\repos\{programming languge}\
+4. git clone <the url> (pulls the main branch)
+5. git branch -a (to see all branches)
+6. git swtich <branch>
+7. to build and run 
+7.1 for node, for example
+    npm install
+    npm run build
+    npm start
+7.2 for VS
+
+
