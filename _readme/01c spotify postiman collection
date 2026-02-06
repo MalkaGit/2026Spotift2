@@ -1,0 +1,366 @@
+{
+  "info": {
+    "_postman_id": "067f85ec-f817-4ab2-8a23-565c126ba125",
+    "name": "Spotify2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9872349"
+  },
+  "item": [
+    {
+      "name": "uc00000 health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "health"
+          ]
+        },
+        "description": "http://localhost:3000/health"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00001-register-user",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"email2@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "register"
+          ]
+        },
+        "description": "http://localhost:3000/users/register"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00002-login-user",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": " {\r\n    \"email\": \"email1@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "login"
+          ]
+        },
+        "description": "http://localhost:3000/users/login"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00003-get-user-profile",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/users/me",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "description": "http://localhost:3000/users/me"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00004-add-user-like-backend",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"entityType\": \"artist\",\r\n    \"entityId\":\"111a1e45-c1c2-4b56-a331-eba6bd9b9db8\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/me/likes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me",
+            "likes"
+          ]
+        },
+        "description": "POST http://localhost:3000/users/me/likes"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00005-query-my-like",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/users/me/likes?sort=name&offset=0&limit=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me",
+            "likes"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "name"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "2"
+            }
+          ]
+        },
+        "description": "GET http://localhost:3000/users/me/likes"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v1-MySQL-like",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v1/artists?q=ak&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v1",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "ak"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "GET http://localhost:3000/search/v1/artists"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v2-MySQL-fullTextSearch-substringNOTworking",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v2/artists?q=Beyo&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v2",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "Beyo"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v2-MySQL-fullTextSearch-wordDOESwork",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v2/artists?q=sheeran&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v2",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "sheeran"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
