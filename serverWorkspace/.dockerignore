@@ -1,0 +1,62 @@
+# =============================================================================
+# .dockerignore — what it is and how it’s used
+# =============================================================================
+#
+# GOAL:
+#   This file tells Docker which files and folders NOT to send to the build context 
+#   when you run "docker build". 
+#   This keeps images smaller, builds faster, and avoids copying secrets or junk into the image.
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Dependencies (reinstalled in image)
+# Don't copy node_modules from local machine to the image.
+# The Dockerfile will run npm install inside the image 
+# -----------------------------------------------------------------------------
+node_modules
+**/node_modules
+
+# -----------------------------------------------------------------------------
+# Secrets and local env (use env vars or compose env_file instead)
+# Don't copy env files from local machine to the image. 
+# Use runtime env or docker-compose env_file to set environment variables.
+# The "!.env.example" line means: do NOT ignore .env.example
+# (so you can COPY it as a template if your Dockerfile needs it).
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------------------------------------------------------
+# Build output (rebuilt in image)
+# Do not copy "dist" folders from local machine to the image.
+# The dockerfile will build the "dist" folder inside the image.
+# -----------------------------------------------------------------------------
+**/dist
+
+# -----------------------------------------------------------------------------
+# Logs and debug
+# Do not copy Log files and npm debug output from local machine to the image
+# as they are not needed to run the app in the container.
+# -----------------------------------------------------------------------------
+*.log
+npm-debug.log*
+
+# -----------------------------------------------------------------------------
+# Version control and OS
+# Do not copy git files from local machine to the image
+# as they are not needed to run the app in the container.
+# -----------------------------------------------------------------------------
+.git
+.gitignore
+.DS_Store
+
+# -----------------------------------------------------------------------------
+# Docs and misc (not needed in image)
+# Do not copy documentation and readme folders 
+# as they are not needed to run the app in the container.
+# -----------------------------------------------------------------------------
+README*
+readme.md
+REAME

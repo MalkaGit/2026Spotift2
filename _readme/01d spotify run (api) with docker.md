@@ -7,7 +7,6 @@ This document mirrors the first guidance about Docker so you can refer back to i
 ===============================================
 **Run:** From `serverWorkspace`:
 
-
 ```powershell
 option1: docker compose up --build
 option2: 
