@@ -1,0 +1,45 @@
+# =============================================================================
+# docker-compose.yml
+# =============================================================================
+#
+# GOAL:
+#   This file describes how to run your app in containers.
+
+#   when you run "docker compose up" it uses this file 
+#   to know which services to run and how (ports, env, restart policy).
+#   
+#   when you run "docker compose build" it uses this file 
+#   to know which services to build and how (build context, dockerfile, etc.).
+#
+#   when you run "docker compose down" it uses this file 
+#   to know which services to stop and how (restart policy).
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Service name "api". You can have more (e.g. "frontend", "mysql") later.
+  # ---------------------------------------------------------------------------
+  api:
+    # Build the image from the Dockerfile in this folder (no image name needed).
+    build:
+      context: .                    # Build context = current dir (serverWorkspace)
+      dockerfile: Dockerfile        # Use this Dockerfile (default name)
+    # Map a port on your PC to a port in the container: "host:container".
+    # So http://localhost:3000 on your machine goes to port 3000 inside the container.
+    ports:
+      - "3000:3000"
+    # Load these env vars from a file. The app will see DB_USER, DB_PASSWORD,
+    # JWT_SECRET, LOG_LEVEL, etc. from app-rest-api/.env (not baked into the image).
+    env_file:
+      - app-rest-api/.env
+    # Env vars set here override env_file and Dockerfile ENV. We set defaults
+    # and DB_HOST so the container can reach MySQL running on your host PC.
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # On Windows/Mac, "host.docker.internal" is the host machine. So the
+      # container can connect to MySQL at 127.0.0.1:3306 on your PC.
+      DB_HOST: host.docker.internal
+    # If the container exits, restart it (unless you stopped it with compose down).
+    restart: unless-stopped
