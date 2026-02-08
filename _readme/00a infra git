@@ -87,7 +87,7 @@ git push origin  `my-feature-branch-name`
 -click: create pull request
 -click: merge pull reuqest
 -click: confirm merge
-
+-see the status as merged on github
 
 
 

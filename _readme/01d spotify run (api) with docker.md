@@ -3,6 +3,20 @@
 This document mirrors the first guidance about Docker so you can refer back to it later.
 
 ===============================================
+### 5. Run
+===============================================
+**Run:** From `serverWorkspace`:
+
+
+```powershell
+option1: docker compose up --build
+option2: 
+c:\dev\repos\node\2026Spotift2\serverWorkspace>
+docker compose build
+docker compose up
+
+
+===============================================
 ### 1. What "Docker for deployment only" means
 ===============================================
 
@@ -73,25 +87,23 @@ If any of these steps fail, capture the full error message so we can debug it.
 ===============================================
 
 
+- **Dockerfile**: build
+ a text file that describes how to build an image 
 
-- **Image**: a **recipe + snapshot** of an environment, e.g. "Node 20 + API code + dependencies".
-
-- **Dockerfile**: a text file that describes how to build an image (base image, copy files, run `npm install`, set `CMD`, etc.).
-
-- **.dockerignore**: 
-keeps the **build context** small
+- **.dockerignore**:  ignore 
+a text file that defines which to exclude from the image 
+to keep the **build context** small
  (e.g. exclude `node_modules`, `.env`). 
- The image does not get your local `node_modules` 
- because the Dockerfile runs `npm install` inside the image; 
- .dockerignore avoids sending those files to Docker and avoids accidentally copying them.
 
-
-
-- **Docker Compose (`docker-compose.yml` / `compose.yaml`)**:
+ - **Docker Compose (`docker-compose.yml` )**: stop\run
   - Describes one or more services (containers) and how they connect.
   - For this project: **one service**, **api**. You still run `docker compose up`.
 
-- **Container**: a **running instance** of an image (like a process with its own filesystem and network).
+- **Container**: a **running instance** of an image 
+  (like a process with its own filesystem and network).
+
+- **Image**: like zip with your code 
+
 
 
 
@@ -123,7 +135,6 @@ Once Docker Desktop is installed and working
 
 - **Dockerfile**:
 ->build and expose API. gets env vars from caller.
-
  build context is `serverWorkspace`;
   Uses a `node` base image;
  copies `app-rest-api` and `lib-common`, runs `npm install` and build; 
@@ -132,7 +143,6 @@ Once Docker Desktop is installed and working
 
 
 - **docker-compose.yml**: 
-
 One service, **api**, 
 built from `serverWorkspace/Dockerfile` with context `serverWorkspace`.
 Pass env vars so the API can connect to **external MySQL** 
@@ -144,10 +154,34 @@ Pass env vars so the API can connect to **external MySQL**
 ===============================================
 **Run:** From `serverWorkspace`:
 
-```powershell
-c:\dev\repos\node\2026Spotift2\serverWorkspace>
-docker compose up --build
 
+```powershell
+option1: docker compose up --build
+option2: 
+c:\dev\repos\node\2026Spotift2\serverWorkspace>
+docker compose build
+docker compose up
+```
+
+**Command 1 — docker compose build**
+
+- **What it does:** Reads the Dockerfile and `.dockerignore`, sends the build context to Docker, and creates the image (all layers: base Node, dependencies, built app). Does not start any container.
+- **Output:** Build logs (e.g. "Building api...", "=> CACHED" or "=> [1/8] FROM node:20-alpine", step-by-step progress, and finally "Successfully built ..." and "Successfully tagged serverworkspace-api:latest").
+
+**Command 2 — Run docker compose up**
+
+- **What it does:** Creates and starts the containers defined in `docker-compose.yml` (here: the API service). Uses the image built in step 1. Binds port 3000 on your PC to port 3000 in the container so you can call `http://localhost:3000`. Logs from the app appear in the terminal (foreground).
+- **Output:** Container startup messages, then the API process logs (e.g. "Server listening on port 3000"). The terminal stays attached; use Ctrl+C to stop the containers.
+
+**One-shot alternative:** `docker compose up --build` runs both steps (build if needed, then up). Use the two commands above when you want to see build and run separately.
+
+---
+
+
+
+===============================================
+### 6. other commanda
+===============================================
 ```see the docker process 
 c:\dev\repos\node\2026Spotift2\serverWorkspace>
 docker compose ps
