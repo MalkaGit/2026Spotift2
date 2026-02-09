@@ -39,6 +39,7 @@ import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
 import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
+import { artistsRouter } from "./modules/artists";
 import { searchRouter as searchV1Router } from "./modules/search/v1";
 import { searchRouter as searchV2Router } from "./modules/search/v2";
 
@@ -84,6 +85,7 @@ app.get("/health", (_req, res) => {
 app.use("/users", usersRouter);
 app.use("/search/v1", searchV1Router);
 app.use("/search/v2", searchV2Router);
+app.use("/artists", artistsRouter);
 
 // Error Middleware (MUST be last - catches all errors from routes above)
 app.use(errorMiddleware);
