@@ -361,6 +361,33 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "uc00009-backend-delete-artist-using-transaction",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer ",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+          ]
+        },
+        "description": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+      },
+      "response": []
     }
   ]
 }
