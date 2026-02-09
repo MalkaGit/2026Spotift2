@@ -25,6 +25,7 @@ response:
 
 
 
+
 Test case1: error - artist doest not exit
  request
 DELETE http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42
@@ -38,34 +39,35 @@ response:
 }
 
 
-[10:26:13.407] DEBUG: JWT auth - User authenticated and stored in context
+
+[17:32:42.311] INFO: Server running on port 3000
+[17:32:47.263] DEBUG: JWT auth - User authenticated and stored in context
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "649810a9-890b-42e8-a569-6d92feec3858"
-[10:26:13.408] DEBUG: requireAuthenticated - user authenticated successfully
+    correlationId: "8674a398-d71f-4cb7-a435-ebf16543da45"
+[17:32:47.265] DEBUG: requireAuthenticated - user authenticated successfully
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "649810a9-890b-42e8-a569-6d92feec3858"
-[10:26:13.408] DEBUG: artists.findById - SQL query
+    correlationId: "8674a398-d71f-4cb7-a435-ebf16543da45"
+[17:32:47.265] DEBUG: artists.findById - SQL query
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "649810a9-890b-42e8-a569-6d92feec3858"
+    correlationId: "8674a398-d71f-4cb7-a435-ebf16543da45"
     sql: "SELECT id, user_id, name, bio, image_url, created_at FROM artists WHERE id = ? LIMIT 1"
     params: [
-      "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+      "555a1e45-c1c2-4b56-a331-eba6bd9b9db6"
     ]
-[10:26:13.420] WARN: Domain error
+[17:32:47.306] INFO: HTTP request completed
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "649810a9-890b-42e8-a569-6d92feec3858"
+    correlationId: "8674a398-d71f-4cb7-a435-ebf16543da45"
     method: "DELETE"
-    path: "/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    code: "ARTIST_NOT_FOUND"
-    message: "Artist with id d03c3755-46f7-4498-8ec5-bc9ace43ac42 not found"
-[10:26:13.421] INFO: HTTP request completed
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "649810a9-890b-42e8-a569-6d92feec3858"
-    method: "DELETE"
-    url: "/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+    url: "/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db6"
     path: "/:id"
     statusCode: 404
-    durationMs: 14
+    durationMs: 43
+
+
+
+
+
+
 
 
 
@@ -93,36 +95,36 @@ output
 
 log
 
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
-[10:30:43.644] INFO: Server running on port 3000
-[10:30:48.815] DEBUG: JWT auth - User authenticated and stored in context
+
+[17:33:50.581] INFO: Server running on port 3000
+[17:33:55.872] DEBUG: JWT auth - User authenticated and stored in context
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-[10:30:48.818] DEBUG: requireAuthenticated - user authenticated successfully
+    correlationId: "737f3d3f-9871-45d5-bbd0-c916e060f3f6"
+[17:33:55.873] DEBUG: requireAuthenticated - user authenticated successfully
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-[10:30:48.818] DEBUG: artists.findById - SQL query
+    correlationId: "737f3d3f-9871-45d5-bbd0-c916e060f3f6"
+[17:33:55.873] DEBUG: artists.findById - SQL query
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
+    correlationId: "737f3d3f-9871-45d5-bbd0-c916e060f3f6"
     sql: "SELECT id, user_id, name, bio, image_url, created_at FROM artists WHERE id = ? LIMIT 1"
     params: [
-      "aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+      "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     ]
-[10:30:48.846] WARN: Domain error
+[17:33:55.909] WARN: Domain error
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
+    correlationId: "737f3d3f-9871-45d5-bbd0-c916e060f3f6"
     method: "DELETE"
-    path: "/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+    path: "/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     code: "FORBIDDEN"
     message: "You can only delete artists you manage."
-[10:30:48.850] INFO: HTTP request completed
+[17:33:55.912] INFO: HTTP request completed
     userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
+    correlationId: "737f3d3f-9871-45d5-bbd0-c916e060f3f6"
     method: "DELETE"
-    url: "/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+    url: "/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     path: "/:id"
     statusCode: 403
-    durationMs: 35
+    durationMs: 40
 
 
 
@@ -130,56 +132,6 @@ log
 
 
 
-
-
-
-
-
-Test case3: error - attemting to delete artitst that  i did not create
-
-
-requst 
-DELETE http://localhost:3000/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8
-Header Authorization   Bearer <token:
-
-output 
-403 forbidden
-{
-    "code": "FORBIDDEN",
-    "message": "You can only delete artists you manage."
-}
-
-
-log
-10:30:43.644] INFO: Server running on port 3000
-[10:30:48.815] DEBUG: JWT auth - User authenticated and stored in context
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-[10:30:48.818] DEBUG: requireAuthenticated - user authenticated successfully
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-[10:30:48.818] DEBUG: artists.findById - SQL query
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-    sql: "SELECT id, user_id, name, bio, image_url, created_at FROM artists WHERE id = ? LIMIT 1"
-    params: [
-      "aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
-    ]
-[10:30:48.846] WARN: Domain error
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-    method: "DELETE"
-    path: "/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
-    code: "FORBIDDEN"
-    message: "You can only delete artists you manage."
-[10:30:48.850] INFO: HTTP request completed
-    userId: "fa49cd77-1bc1-49f1-a73e-14ba73cf9d63"
-    correlationId: "eaa30242-7e0e-480b-83e7-61d86352716f"
-    method: "DELETE"
-    url: "/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
-    path: "/:id"
-    statusCode: 403
-    durationMs: 35
 
 
 
@@ -198,38 +150,52 @@ Header Authorization   Bearer <token:
 output 
 204 no content
 
-log
-[10:37:31.124] DEBUG: JWT auth - User authenticated and stored in context
+
+[17:35:21.568] DEBUG: JWT auth - User authenticated and stored in context
     userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    correlationId: "9d5d7af4-7ec7-4ed4-8645-54e49838f657"
-[10:37:31.125] DEBUG: requireAuthenticated - user authenticated successfully
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
+[17:35:21.568] DEBUG: requireAuthenticated - user authenticated successfully
     userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    correlationId: "9d5d7af4-7ec7-4ed4-8645-54e49838f657"
-[10:37:31.125] DEBUG: artists.findById - SQL query
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
+
+[17:35:21.568] DEBUG: artists.findById - SQL query
     userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    correlationId: "9d5d7af4-7ec7-4ed4-8645-54e49838f657"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
     sql: "SELECT id, user_id, name, bio, image_url, created_at FROM artists WHERE id = ? LIMIT 1"
     params: [
-      "aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+      "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     ]
-[10:37:31.127] DEBUG: artists.deleteById - SQL query
+[17:35:21.579] DEBUG: likes.deleteByEntity - SQL query
     userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    correlationId: "9d5d7af4-7ec7-4ed4-8645-54e49838f657"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
+    sql: "DELETE FROM likes WHERE entity_type = ? AND entity_id = ?"
+    params: [
+      "artist",
+      "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
+    ]
+[17:35:21.581] DEBUG: artists.deleteByIdCascade - SQL query
+    userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
     sql: "DELETE FROM artists WHERE id = ?"
     params: [
-      "aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+      "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     ]
-[10:37:31.150] INFO: HTTP request completed
+[17:35:21.590] DEBUG: artists.deleteByIdCascade - transaction committed
     userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
-    correlationId: "9d5d7af4-7ec7-4ed4-8645-54e49838f657"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
+
+[17:35:21.590] DEBUG: artists.deleteByIdCascade - connection released
+    userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
+    
+[17:35:21.590] INFO: HTTP request completed
+    userId: "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+    correlationId: "d0ba303b-ee7e-4e50-9b98-e5ab65b73a96"
     method: "DELETE"
-    url: "/artists/aaa1e450-c1c2-4b56-a331-eba6bd9b9db8"
+    url: "/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
     path: "/:id"
     statusCode: 204
-    durationMs: 26
-
-
-
+    durationMs: 22
 
 
 

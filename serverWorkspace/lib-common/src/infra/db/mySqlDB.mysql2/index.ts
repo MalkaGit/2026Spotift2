@@ -9,6 +9,7 @@
  */
 
 export { pool as mysqlPool } from "./db.client";
-export { testConnection as testMySqlConnection} from "./db.client.tester";    
+export { testConnection as testMySqlConnection} from "./db.client.tester";
+export type { MySqlConnection } from "./db.types";
 
 

@@ -1,4 +1,5 @@
 import { mysqlPool } from "@mycompanyname/lib-common";
+import { MySqlConnection } from "@mycompanyname/lib-common";
 import { logger } from "@mycompanyname/lib-common";
 import { AddLikeInput, AddLikeOutput, LikedEntityType, LikesItem, QueryLikesInput } from './types';
 import { randomUUID } from "crypto";
@@ -226,3 +227,37 @@ export async function queryLikesByUser(
   // Map database rows to LikesItem
   return result.map(mapRowToLikesItem);
 }
+
+
+
+
+/**
+ * Delete likes of specific artitst\album\playlist
+ *
+ * When no connection is provided, 
+ * it runs as a standalone statement on the pool.
+ * When a connection is provided, the delete runs on that connection –
+ * this is used when the caller manages a broader transaction. 
+ *
+ * @param entityType - Type of entity ('artist', 'album', or 'playlist')
+ * @param entityId - ID of the entity whose likes should be deleted
+ * @param connection - Optional pool connection for transactional usage (from mysqlPool.getConnection())
+ */
+export async function deleteByEntity(
+  entityType: LikedEntityType,
+  entityId: string,
+  connection?: MySqlConnection
+): Promise<void> {
+  const sql = `DELETE FROM likes WHERE entity_type = ? AND entity_id = ?`;
+  const params = [entityType, entityId];
+
+  logger.debug("likes.deleteByEntity - SQL query", { sql, params });
+
+  if (connection) {
+    await connection.query(sql, params);
+  } else {
+    await mysqlPool.query(sql, params);
+  }
+}
+
+

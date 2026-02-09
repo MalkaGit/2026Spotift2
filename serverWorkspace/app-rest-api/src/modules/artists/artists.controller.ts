@@ -5,8 +5,11 @@ import * as artistsService from "./artists.service";
 /**
  * DELETE /artists/:id
  * Deletes an artist.
- * 204 No Content on success.
- * 404 if artist not found; 403 if not the owner.
+ *
+ * @requires Authentication - JWT token required
+ * @returns 204 No Content on success
+ * @returns 404 if artist not found
+ * @returns 403 if not the owner (ForbiddenError)
  */
 export async function deleteArtist(
   req: TypedRequest<any, { id: string }>,
@@ -14,17 +17,18 @@ export async function deleteArtist(
   next: NextFunction
 ) {
   try {
-    const userId: string = requestContext.getUserId()!;
+    const userId: string = requestContext.getUserId()!;                           // userId guaranteed non-null; auth middleware throws if unauthenticated
     const artistId: string = req.params.id;
     const deleted: boolean = await artistsService.deleteArtist(userId, artistId);
 
     if (deleted) {
-      res.status(204).end();
+      res.status(204).end(); // Artist deleted successfully, No Content
     } else {
-      // Artist not found
-      res.status(404).end();
+      res.status(404).end(); // Artist not found, Not Found
     }
   } catch (err) {
     next(err);
   }
 }
+
+
