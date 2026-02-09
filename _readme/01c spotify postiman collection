@@ -375,7 +375,7 @@
         ],
         "url": {
           "raw": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42",
-          "protocol": "http",
+          "protocol": "http", 
           "host": [
             "localhost"
           ],
