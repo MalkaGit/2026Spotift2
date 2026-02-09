@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+
 /**
  * Schema for validating URL path parameters for artist endpoints.
  * Endpoints: GET /artists/:id, PATCH /artists/:id, DELETE /artists/:id
