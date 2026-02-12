@@ -39,7 +39,7 @@ import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
 import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
-import { artistsRouter } from "./modules/artists";
+import { artistsRouter } from "./modules/catalog/artists";
 import { searchRouter as searchV1Router } from "./modules/search/v1";
 import { searchRouter as searchV2Router } from "./modules/search/v2";
 

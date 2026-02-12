@@ -1,8 +1,8 @@
 import { mysqlPool } from "@mycompanyname/lib-common";
 import { logger } from "@mycompanyname/lib-common";
 import { MySqlConnection } from "@mycompanyname/lib-common";
-import * as likesRepo from "../likes/likes.repository";
-import { LIKED_ENTITY_ARTIST } from "../likes/types";
+import * as likesRepo from "../../likes/likes.repository";
+import { LIKED_ENTITY_ARTIST } from "../../likes/types";
 
 /**
  * Artist entity matching the artists table schema.
