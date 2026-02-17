@@ -1,11 +1,19 @@
-root
-local: 1234
-create schena: spotify2db
+
+-- =============================================================
+-- Run as MySQL script. Connection: root @ localhost:1234 (adjust as needed).
+--
+-- Soft delete: tables have deleted_at TIMESTAMP NULL.
+--   NULL = active row, non-NULL = deleted at that time.
+--   Queries for "active" data: WHERE deleted_at IS NULL
+-- =============================================================
+
+DROP DATABASE IF EXISTS spotify2db;
+CREATE DATABASE spotify2db;
+USE spotify2db;
 
 --  ========================================
---  users TABLE (user manages many artists)
---  ======================================== 
-use  spotify2db;
+--  users TABLE
+--  ========================================
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -13,29 +21,33 @@ CREATE TABLE users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL
 );
--- Note: it includes indexes
-
-
 
 --  ========================================
---  ARTISTS TABLE (user manages many artists)
---  ======================================== 
+--  Seed users (required for artist FK; adjust password in production)
+--  ========================================
+INSERT INTO users (id, email, password_hash, role)
+VALUES ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'admin@spotify2.local', '$2a$10$placeholder.hash.replace.in.production', 'admin');
 
-use  spotify2db;
+--  ========================================
+--  artists TABLE (user manages many artists)
+--  ========================================
 DROP TABLE IF EXISTS artists;
 
 CREATE TABLE artists (
   id CHAR(36) NOT NULL PRIMARY KEY,
-  user_id CHAR(36) NOT NULL,       -- the user that manage the artist data
+  user_id CHAR(36) NOT NULL,       -- user who manages the artist data
   name VARCHAR(255) NOT NULL,
   bio TEXT,
   image_url VARCHAR(512),          -- URL to artist image/photo
+  header_image_url VARCHAR(512),   -- URL to artist header/banner image
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
   CONSTRAINT fk_artist_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE 
-    -- cascade means that when user deleted, the Artists it manages are deleted autmatically by db in transaction
+    REFERENCES users(id) ON DELETE CASCADE
+    -- cascade: when user is deleted, their artists are deleted by DB in same transaction
 ) ENGINE=InnoDB;
 
 -- Full-text search index on name for fast text search (used by search/v2)
@@ -52,55 +64,47 @@ CREATE INDEX idx_artist_user ON artists(user_id);
 
 
 
--- INSERT ARTITST DATA  
--- Note: it will fail on fk constraint. fix: change user id in the statements below
-
-use  spotify2db;
-INSERT INTO artists (id, user_id, name, bio, image_url)
+--  ========================================
+--  Seed artists (owned by seed user above)
+--  ========================================
+INSERT INTO artists (id, user_id, name, bio, image_url, header_image_url)
 VALUES
-('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png/256px-191125_Taylor_Swift_at_the_2019_American_Music_Awards_%28cropped%29.png'),
+('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Taylor Swift', 'American singer-songwriter', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
 
-('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Drake', 'Canadian rapper and singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Drake_-_OVO_Fest_2018_%2848634431131%29_%28cropped%29.jpg/256px-Drake_-_OVO_Fest_2018_%2848634431131%29_%28cropped%29.jpg'),
+('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Drake', 'Canadian rapper and singer', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s', 'https://headerart.weebly.com/uploads/5/7/5/7/5757212/eye-catching-colorful-paints-art-header_orig.jpg'),
 
-('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ed Sheeran', 'English pop singer-songwriter', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Ed_Sheeran_%288508047844%29.jpg/256px-Ed_Sheeran_%288508047844%29.jpg'),
+('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ed Sheeran', 'English pop singer-songwriter', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXfpdFmvpRY2-_cjIdEj-l59jukh4oE_CrEQ&s'),
 
-('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Beyoncé', 'American singer and performer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png/256px-Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png'),
+('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Beyoncé', 'American singer and performer', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFeWSMPJ13SvJXow9XLlncZp442Rr3va4KIw&s'),
 
-('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Eminem', 'American rapper and producer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Eminem_-_Concert_for_Valor%2C_Washington%2C_D.C._Nov._11%2C_2014_%282%29_%28Cropped%29.jpg/256px-Eminem_-_Concert_for_Valor%2C_Washington%2C_D.C._Nov._11%2C_2014_%282%29_%28Cropped%29.jpg'),
+('555a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Eminem', 'American rapper and producer', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMtMZKiqJZMq26-kYYN56PvYECADkZG0pKCA&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMNdsfpywUeKwm-6lrWS_YU2QQtTy-1k750Q&s'),
 
-('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ariana Grande', 'American pop and R&B singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/20200629_Ariana_Grande_White_House_%28cropped%29.jpg/256px-20200629_Ariana_Grande_White_House_%28cropped%29.jpg'),
+('666a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Ariana Grande', 'American pop and R&B singer', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_GSsX68QVsi_k16pEKW0ExOCzhbk78JEQ8w&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVeCSxm75WS-7lppF-gIfxBJ5LEWG0oWC-wA&s'),
 
-('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Imagine Dragons', 'American pop rock band', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Imagine_Dragons_2017_%28cropped%29.jpg/256px-Imagine_Dragons_2017_%28cropped%29.jpg'),
+('777a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Imagine Dragons', 'American pop rock band', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJuFdDT2tn1xeF8x_4Y6DBmkTWMah5JrLogQ&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-VlqGKfVZGwvP-6V1oLEQOICtlmJ0EC58JA&s'),
 
-('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Rihanna', 'Barbadian singer and entrepreneur', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Rihanna_Fenty_2018.png/256px-Rihanna_Fenty_2018.png'),
+('888a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Rihanna', 'Barbadian singer and entrepreneur', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMmGVcX-zXjjKWK5BqEFPitD4eYfMWHUartw&s', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
 
-('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'The Weeknd', 'Canadian R&B singer', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/The_Weeknd_%2848448443451%29_%28cropped%29.jpg/256px-The_Weeknd_%2848448443451%29_%28cropped%29.jpg'),
+('999a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'The Weeknd', 'Canadian R&B singer', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s', 'https://headerart.weebly.com/uploads/5/7/5/7/5757212/eye-catching-colorful-paints-art-header_orig.jpg'),
 
-('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Metallica', 'American heavy metal band', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Metallica_Live_at_The_O2_Arena_London_2017_11_10_%284%29_%28cropped%29.jpg/256px-Metallica_Live_at_The_O2_Arena_London_2017_11_10_%284%29_%28cropped%29.jpg');
-
-
-
-
+('aaa1e450-c1c2-4b56-a331-eba6bd9b9db8', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', 'Metallica', 'American heavy metal band', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXfpdFmvpRY2-_cjIdEj-l59jukh4oE_CrEQ&s');
 
 -- ========================================================
---  likes TABLE (artist\album\playlists has many likes)
---  ======================================================== 
-use  spotify2db;
-
+--  likes TABLE (artists/albums/playlists can have many likes)
+-- ========================================================
 DROP TABLE IF EXISTS likes;
 
 CREATE TABLE likes (
-  id CHAR(36) NOT NULL PRIMARY KEY,                   	-- unique like ID
-  user_id CHAR(36) NOT NULL,                          	-- FK → users.id
-  entity_type VARCHAR(32) NOT NULL,                    	-- type of entity (artist, album, playlist, etc.)
-  entity_id CHAR(36) NOT NULL,                         	-- ID of liked entity, no fk and delete cascade
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,       -- timestamp of like
-  UNIQUE KEY uq_like (user_id, entity_type, entity_id), -- user can like same entity twice
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,                           -- FK → users.id
+  entity_type VARCHAR(32) NOT NULL,                    -- artist, album, playlist, etc.
+  entity_id CHAR(36) NOT NULL,                         -- ID of liked entity (no FK; app manages orphans)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
+  UNIQUE KEY uq_like (user_id, entity_type, entity_id), -- one like per user per entity
   CONSTRAINT fk_like_user FOREIGN KEY (user_id)
-  REFERENCES users(id) ON DELETE CASCADE 				-- fk, you can not add like to user that dies not exist
-														-- Delete cascade: data integrity - if user deleted it’s likes deleted automatically by db in transaction
+    REFERENCES users(id) ON DELETE CASCADE             -- if user deleted, their likes deleted in same transaction
 ) ENGINE=InnoDB;
-
 
 -- Quickly fetch all likes of a user
 CREATE INDEX idx_likes_user ON likes(user_id);
@@ -111,88 +115,180 @@ CREATE INDEX idx_likes_user_created ON likes(user_id, created_at DESC);
 --  Quickly count or fetch likes for a specific entity
 CREATE INDEX idx_likes_entity ON likes(entity_type, entity_id);
 
--- Note: likes table does not have fk to aritis,album,tranck,playlist but only entity id
--- so, when artis is deleted , db does not delete its likes automatically in transction
--- to void having orphans (likes pointing to artits that do not exist)
--- the code has to handle delete in transaction, so when parent (aritist) is deleted
--- we remove it’s children (likes) in transaction to ensure consistncy and avoid having orphans
-
-
-
-
-
-
-
-
-
+-- Note: likes has no FK to artists/albums/playlists, only entity_type + entity_id.
+-- When an artist (or album/playlist) is deleted, the app must remove related likes in the same transaction to avoid orphans.
 
 --  ========================================
---  ALBUMS TABLE (user manages many artists)
---  ======================================== 
-use  spotify2db;
+--  albums TABLE
+--  ========================================
 DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
   id CHAR(36) NOT NULL PRIMARY KEY,
+  artist_id CHAR(36) NOT NULL,      -- FK → artists.id
   name VARCHAR(255) NOT NULL,
-  image_url VARCHAR(512)          -- URL to artist image/photo
+  image_url VARCHAR(512),           -- URL to album cover image
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_album_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
- 
+
+-- Fetch all albums of an artist and support search/sort
+CREATE INDEX idx_album_artist ON albums(artist_id);
+CREATE INDEX idx_album_artist_name ON albums(artist_id, name);
+
 --  ========================================
---  PLAYLISTS TABLE (user manages many artists)
---  ======================================== 
-use  spotify2db;
+--  playlists TABLE
+--  ========================================
 DROP TABLE IF EXISTS playlists;
 
 CREATE TABLE playlists (
   id CHAR(36) NOT NULL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  image_url VARCHAR(512)          -- URL to artist image/photo
+  image_url VARCHAR(512),         -- URL to playlist cover image
+  deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB;
- 
 
- 
+--  ========================================
+--  tracks TABLE
+--  ========================================
+DROP TABLE IF EXISTS tracks;
 
+CREATE TABLE tracks (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  album_id CHAR(36) NOT NULL,        -- FK → albums.id
+  name VARCHAR(255) NOT NULL,
+  duration_ms INT NOT NULL,          -- track duration in milliseconds
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_track_album FOREIGN KEY (album_id)
+    REFERENCES albums(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
- USE spotify2db;
+-- Fetch tracks by album and support search/sort
+CREATE INDEX idx_track_album ON tracks(album_id);
+CREATE INDEX idx_track_album_name ON tracks(album_id, name);
 
--- Update by artist name so it works regardless of id (e.g. after re-seeding)
--- Images: Wikipedia Commons (stable, free to use)
+--  ========================================
+--  artist_stats TABLE (per-artist aggregate stats)
+--  ========================================
+DROP TABLE IF EXISTS artist_stats;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'
-WHERE name = 'Taylor Swift';
+CREATE TABLE artist_stats (
+  artist_id CHAR(36) NOT NULL PRIMARY KEY,  -- FK → artists.id
+  monthly_listeners BIGINT NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_artist_stats_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id)       -- NO CASCADE: keep historical stats even if artist is soft-deleted
+) ENGINE=InnoDB;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'
-WHERE name = 'Drake';
+-- Rank and browse artists by monthly listeners
+CREATE INDEX idx_artist_stats_monthly_listeners ON artist_stats(monthly_listeners DESC);
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'
-WHERE name = 'Ed Sheeran';
+--  ========================================
+--  artist_top_tracks_stats TABLE (per-artist top tracks aggregates)
+--  ========================================
+DROP TABLE IF EXISTS artist_top_tracks_stats;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s'
-WHERE name = 'Beyoncé';
+CREATE TABLE artist_top_tracks_stats (
+  artist_id CHAR(36) NOT NULL,     -- FK → artists.id
+  track_id CHAR(36) NOT NULL,      -- FK → tracks.id
+  total_plays BIGINT NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (artist_id, track_id),
+  CONSTRAINT fk_artist_top_tracks_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id),      -- NO CASCADE: keep historical top tracks even if artist is soft-deleted
+  CONSTRAINT fk_artist_top_tracks_track FOREIGN KEY (track_id)
+    REFERENCES tracks(id)        -- NO CASCADE: keep historical top tracks even if track is soft-deleted
+) ENGINE=InnoDB;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMtMZKiqJZMq26-kYYN56PvYECADkZG0pKCA&s'
-WHERE name = 'Eminem';
+--  ========================================
+--  track_play_events TABLE (denormalized play events)
+--  ========================================
+DROP TABLE IF EXISTS track_play_events;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_GSsX68QVsi_k16pEKW0ExOCzhbk78JEQ8w&s'
-WHERE name = 'Ariana Grande';
+CREATE TABLE track_play_events (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,       -- FK → users.id
+  track_id CHAR(36) NOT NULL,      -- FK → tracks.id
+  artist_id CHAR(36) NOT NULL,     -- FK → artists.id (denormalized)
+  played_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_tpe_user FOREIGN KEY (user_id)
+    REFERENCES users(id),         -- NO CASCADE: keep historical play events even if user is soft-deleted
+  CONSTRAINT fk_tpe_track FOREIGN KEY (track_id)
+    REFERENCES tracks(id),        -- NO CASCADE: keep historical play events even if track is soft-deleted
+  CONSTRAINT fk_tpe_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id)        -- NO CASCADE: keep historical play events even if artist is soft-deleted
+) ENGINE=InnoDB;
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJuFdDT2tn1xeF8x_4Y6DBmkTWMah5JrLogQ&s'
-WHERE name = 'Imagine Dragons';
+-- Common analytics and query patterns
+CREATE INDEX idx_tpe_user_played_at ON track_play_events(user_id, played_at DESC);
+CREATE INDEX idx_tpe_artist_played_at ON track_play_events(artist_id, played_at DESC);
+CREATE INDEX idx_tpe_track_played_at ON track_play_events(track_id, played_at DESC);
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMmGVcX-zXjjKWK5BqEFPitD4eYfMWHUartw&s'
-WHERE name = 'Rihanna';
+--  ========================================
+--  Seed albums, tracks, and stats
+--  ========================================
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s'
-WHERE name = 'The Weeknd';
+--  Seed albums (artist has albums). Album cover images reuse existing artist images.
+INSERT INTO albums (id, artist_id, name, image_url)
+VALUES
+  -- Taylor Swift
+  ('10000000-0000-0000-0000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '1989 (Taylor''s Version)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'),
+  ('10000000-0000-0000-0000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Midnights', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
 
-UPDATE artists SET image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnzgLe6ywwAgyAZ6Aymp5IpC6dvJKkSd9bg&s'
-WHERE name = 'Metallica';
+  -- Drake
+  ('20000000-0000-0000-0000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Scorpion', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'),
 
--- Optional: more artists (add rows if you have these names in your DB)
+  -- Ed Sheeran
+  ('30000000-0000-0000-0000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '÷ (Divide)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'),
 
+  -- Beyoncé
+  ('40000000-0000-0000-0000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Lemonade', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s');
 
+--  Seed tracks (id, name, duration_ms, album_id)
+INSERT INTO tracks (id, name, duration_ms, album_id)
+VALUES
+  -- Taylor Swift - 1989 (Taylor's Version)
+  ('31000000-0000-0000-0000-000000000001', 'Blank Space (Taylor''s Version)', 231000, '10000000-0000-0000-0000-000000000001'),
+  ('31000000-0000-0000-0000-000000000002', 'Style (Taylor''s Version)', 231000, '10000000-0000-0000-0000-000000000001'),
 
- 
+  -- Taylor Swift - Midnights
+  ('31000000-0000-0000-0000-000000000003', 'Anti-Hero', 200000, '10000000-0000-0000-0000-000000000002'),
 
- 
+  -- Drake - Scorpion
+  ('32000000-0000-0000-0000-000000000001', 'God''s Plan', 198000, '20000000-0000-0000-0000-000000000001'),
+
+  -- Ed Sheeran - ÷ (Divide)
+  ('33000000-0000-0000-0000-000000000001', 'Shape of You', 234000, '30000000-0000-0000-0000-000000000001'),
+
+  -- Beyoncé - Lemonade
+  ('34000000-0000-0000-0000-000000000001', 'Formation', 215000, '40000000-0000-0000-0000-000000000001');
+
+--  Seed artist_stats (artist_id, monthly_listeners)
+INSERT INTO artist_stats (artist_id, monthly_listeners)
+VALUES
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 95000000),  -- Taylor Swift
+  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 72000000),  -- Drake
+  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 68000000),  -- Ed Sheeran
+  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 55000000);  -- Beyoncé
+
+--  Seed artist_top_tracks_stats (artist_id, track_id, total_plays)
+INSERT INTO artist_top_tracks_stats (artist_id, track_id, total_plays)
+VALUES
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-0000-0000-000000000001', 1500000000), -- Taylor Swift - Blank Space
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-0000-0000-000000000003', 1200000000), -- Taylor Swift - Anti-Hero
+  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '32000000-0000-0000-0000-000000000001', 1800000000), -- Drake - God's Plan
+  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '33000000-0000-0000-0000-000000000001', 2100000000), -- Ed Sheeran - Shape of You
+  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '34000000-0000-0000-0000-000000000001', 800000000);  -- Beyoncé - Formation
+
+--  Seed track_play_events (user_id, track_id, artist_id, played_at)
+INSERT INTO track_play_events (user_id, track_id, artist_id, played_at)
+VALUES
+  -- Admin user playing various tracks
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-0000-0000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 2 DAY),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-0000-0000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 1 DAY),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '32000000-0000-0000-0000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 3 HOUR),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '33000000-0000-0000-0000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 90 MINUTE),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '34000000-0000-0000-0000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 10 MINUTE);

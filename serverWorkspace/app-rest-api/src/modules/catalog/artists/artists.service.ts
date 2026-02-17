@@ -1,7 +1,9 @@
 import * as artistsRepo from "./artists.repository";
-import { requireAuthenticated } from "@mycompanyname/lib-common";
-import { ForbiddenError } from "@mycompanyname/lib-common";
-import { ArtistEntity } from "./artists.repository";
+import { requireAuthenticated, requireRole } from "@mycompanyname/lib-common";
+import { ForbiddenError, NotFoundError } from "@mycompanyname/lib-common";
+import { ArtistEntity, ArtistStatEntity } from "./artists.repository";
+import { ArtistOverviewQueryInput, ArtistOverviewOutput } from "./types";
+import { ArtistsErrorCode } from "./artists.error.codes";
 
 
 /**
@@ -36,6 +38,57 @@ export async function deleteArtist(
   return true;
 }
 
+
+
+/**
+ * Operation: Get artist overview with stats information.
+ *
+ * Notes:
+ * - User authentication is handled by JWT middleware (userId extracted from token).
+ * - Structural validation (defaults, ranges) is handled by request validation middleware.
+ * - Authorization: only users with "listener" role can access this overview.
+ *
+ * @param artistId - Artist UUID
+ * @param query - Query input (e.g. topTracksLimit)
+ * @returns ArtistOverviewOutput for the given artist
+ * @throws UnauthorizedError (401) if user is not authenticated
+ * @throws ForbiddenError (403) if user is authenticated but not authorized (listener role required)
+ * @throws NotFoundError if artist does not exist or is soft-deleted
+ */
+export async function getArtistOverview(
+  artistId: string,
+  query: ArtistOverviewQueryInput
+): Promise<ArtistOverviewOutput> {
+
+  // BL: Authentication & Authorization - user must be authenticated and have listener role
+  requireRole(["listener"]);
+
+  // BL: Find artist by ID
+  const artist : ArtistEntity | null = await artistsRepo.findById(artistId);
+  if (!artist) {
+    throw new NotFoundError(
+      ArtistsErrorCode.ARTIST_NOT_FOUND,
+      `Artist with id ${artistId} not found`
+    );
+  }
+
+  // BL: Get artist stats and top tracks (using artist repository !)
+  const [artistStats, artistTopTracks] = await Promise.all([
+    artistsRepo.getArtistStats(artistId),
+    artistsRepo.getArtistTopTracks(artistId, query.topTracksLimit),
+  ]);
+
+  // BL: Create overview output
+  const overview: ArtistOverviewOutput = {
+    artistId: artist.id,
+    artistName: artist.name,
+    headerImageUrl: artist.headerImageUrl,
+    monthlyListeners: artistStats?.monthlyListeners ?? 0,
+    topTracks: artistTopTracks,
+  };
+
+  return overview;
+}
 
 
 

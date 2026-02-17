@@ -42,7 +42,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"email\": \"email2@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n}\r\n",
+          "raw": "{\r\n    \"email\": \"email1@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -244,7 +244,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/search/v1/artists?q=ak&offset=0&limit=5",
+          "raw": "http://localhost:3000/search/v1/artists?q=&offset=0&limit=5",
           "protocol": "http",
           "host": [
             "localhost"
@@ -258,7 +258,7 @@
           "query": [
             {
               "key": "q",
-              "value": "ak"
+              "value": ""
             },
             {
               "key": "offset",
@@ -289,7 +289,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/search/v2/artists?q=Beyo&offset=0&limit=5",
+          "raw": "http://localhost:3000/search/v2/artists?q=ariana grande&offset=0&limit=5",
           "protocol": "http",
           "host": [
             "localhost"
@@ -303,7 +303,7 @@
           "query": [
             {
               "key": "q",
-              "value": "Beyo"
+              "value": "ariana grande"
             },
             {
               "key": "offset",
@@ -369,23 +369,81 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer ",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMDNjMzc1NS00NmY3LTQ0OTgtOGVjNS1iYzlhY2U0M2FjNDIiLCJlbWFpbCI6ImVtYWlsMkBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzA2NTg0OTAsImV4cCI6MTc3MDY2MjA5MCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.GCsui0UPMld-yrhtUMkowQxp8MRRAYZK8G_rZjErkMY",
             "type": "text"
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42",
-          "protocol": "http", 
+          "raw": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+          "protocol": "http",
           "host": [
             "localhost"
           ],
           "port": "3000",
           "path": [
             "artists",
-            "d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+            "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
           ]
         },
         "description": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZTMyZjliMy05MzU1LTRhNjQtYWVmNS0zYzJhYTQ5M2EzZmUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzEzNTE2ODksImV4cCI6MTc3MTM1NTI4OSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.REkkSt4I6HLPMZleSfjVSrjqGE9fieI8_V_Zoep8wdE",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v1-join",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZTMyZjliMy05MzU1LTRhNjQtYWVmNS0zYzJhYTQ5M2EzZmUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzEzNTE4NTgsImV4cCI6MTc3MTM1NTQ1OCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.ZhlrGxfu6H-FS1qDUJT_7dCHSn6s79jlTPW4ZRounOU",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview"
+          ]
+        }
       },
       "response": []
     }
