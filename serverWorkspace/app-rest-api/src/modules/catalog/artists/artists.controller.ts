@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { TypedRequest, requestContext } from "@mycompanyname/lib-common";
 import * as artistsService from "./artists.service";
+import { ArtistOverviewQueryInput, ArtistOverviewOutput } from "./types";
 
 /**
  * DELETE /artists/:id
@@ -26,6 +27,32 @@ export async function deleteArtist(
     } else {
       res.status(404).end(); // Artist not found, Not Found
     }
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /artists/:id/overview
+ * Returns an artist overview with stats information.
+ *
+ * @requires Authentication - JWT token required
+ * @returns 200 OK with ArtistOverviewOutput body
+ * @returns 404 if artist not found
+ */
+export async function getArtistOverview(
+  req: TypedRequest<any, { id: string }, ArtistOverviewQueryInput>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const artistId: string = req.params.id;
+    const query: ArtistOverviewQueryInput = req.validatedQuery!;
+
+    const overview: ArtistOverviewOutput =
+      await artistsService.getArtistOverview(artistId, query);
+
+    res.status(200).json(overview);
   } catch (err) {
     next(err);
   }
