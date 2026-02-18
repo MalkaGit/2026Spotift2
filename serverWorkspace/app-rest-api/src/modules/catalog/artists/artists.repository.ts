@@ -7,7 +7,7 @@ import { ArtistOverviewTrackItem } from "./types/artist.overview.output.model";
 
 /**
  * Artist entity matching the artists table schema.
- * Table: artists (id, user_id, name, bio, image_url, created_at)
+ * Table: artists (id, user_id, name, bio, image_url, header_image_url, action_bar_image_url, created_at)
  * FK: user_id → users(id) ON DELETE CASCADE
  */
 export interface ArtistEntity {
@@ -17,6 +17,7 @@ export interface ArtistEntity {
   bio: string | null;
   imageUrl: string | null;
   headerImageUrl: string | null;
+  actionBarImageUrl: string | null;
   createdAt: string;
 }
 
@@ -28,6 +29,7 @@ function mapRowToArtistEntity(row: any): ArtistEntity {
     bio: row.bio ?? null,
     imageUrl: row.image_url ?? null,
     headerImageUrl: row.header_image_url ?? null,
+    actionBarImageUrl: row.action_bar_image_url ?? null,
     createdAt:
       row.created_at instanceof Date
         ? row.created_at.toISOString()
@@ -39,7 +41,7 @@ function mapRowToArtistEntity(row: any): ArtistEntity {
  * Find an artist by id. Returns null if not found.
  */
 export async function findById(artistId: string): Promise<ArtistEntity | null> {
-  const sql = `SELECT id, user_id, name, bio, image_url, header_image_url, created_at FROM artists WHERE id = ? LIMIT 1`;
+  const sql = `SELECT id, user_id, name, bio, image_url, header_image_url, action_bar_image_url, created_at FROM artists WHERE id = ? LIMIT 1`;
   const params = [artistId];
   logger.debug("artists.findById - SQL query", { sql, params });
   const [rows] = await mysqlPool.query(sql, params);

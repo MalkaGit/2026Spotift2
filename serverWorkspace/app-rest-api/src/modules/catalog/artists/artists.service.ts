@@ -83,6 +83,7 @@ export async function getArtistOverview(
     artistId: artist.id,
     artistName: artist.name,
     headerImageUrl: artist.headerImageUrl,
+    actionBarImageUrl: artist.actionBarImageUrl,
     monthlyListeners: artistStats?.monthlyListeners ?? 0,
     topTracks: artistTopTracks,
   };

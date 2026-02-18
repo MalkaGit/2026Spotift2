@@ -25,6 +25,9 @@ export interface ArtistOverviewOutput {
   /** Header image URL for the artist (banner) */
   headerImageUrl: string | null;
 
+  /** URL for the small image next to Play button (action bar) */
+  actionBarImageUrl: string | null;
+
   /** Current monthly listeners for the artist (from artist_stats) */
   monthlyListeners: number;
 
