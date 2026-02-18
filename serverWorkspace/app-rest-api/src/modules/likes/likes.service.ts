@@ -2,9 +2,9 @@ import * as likesRepo from "./likes.repository";
 import { LikesErrorCode } from "./likes.error.codes";
 import { requireRole, requestContext } from "@mycompanyname/lib-common";
 import { ConflictError, NotFoundError } from "@mycompanyname/lib-common";
-
 import { AddLikeInput, AddLikeOutput } from "./types";
-import {QueryLikesInput, LikesItem } from "./types";
+import { QueryLikesInput, LikesItem } from "./types";
+import type { LikedEntityType } from "./types";
 
 /**
  * Operation: Add a like for a user
@@ -95,7 +95,27 @@ export async function queryLikesByUser(
   requireRole(["listener"]);
   
   //BL: Query user's likes with pagination and sorting
-  const items :LikesItem[] = await likesRepo.queryLikesByUser(userId, query);
+  const items: LikesItem[] = await likesRepo.queryLikesByUser(userId, query);
   
   return items;
+}
+
+/**
+ * Check if a like exists for a given user and entity.
+ *
+ * This is a small cross-module helper used by other domains (e.g. artists)
+ * to answer questions like "has this user liked this artist?"
+ *
+ * @param userId - User ID (UUID)
+ * @param entityType - Type of entity ('artist', 'album', or 'playlist')
+ * @param entityId - ID of the entity being checked
+ * @returns true if like exists, false otherwise
+ */
+export async function likeExists(
+  userId: string,
+  entityType: LikedEntityType,
+  entityId: string
+): Promise<boolean> {
+  // No additional auth/validation – callers are responsible for role checks
+  return likesRepo.exists(userId, entityType, entityId);
 }
