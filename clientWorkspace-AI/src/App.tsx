@@ -6,6 +6,7 @@ import { LoginPage } from '@/routes/LoginPage';
 import { LibraryPage } from '@/routes/LibraryPage';
 import { OnboardingFavoritesPage } from '@/routes/OnboardingFavoritesPage';
 import { SearchPage } from '@/routes/SearchPage';
+import { ArtistOverviewPage } from '@/routes/ArtistOverviewPage';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="library" element={<LibraryPage />} />
             <Route path="onboarding/favorites" element={<OnboardingFavoritesPage />} />
             <Route path="search" element={<SearchPage />} />
+            <Route path="artist/:artistId" element={<ArtistOverviewPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

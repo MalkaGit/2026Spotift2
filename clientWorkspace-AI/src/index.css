@@ -798,3 +798,404 @@ a:hover {
 .modal-body + .modal-actions {
   margin-top: 24px;
 }
+
+/* Artist card: link to overview (image + name) */
+.artist-card-spotify-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.artist-card-spotify-link:hover {
+  text-decoration: none;
+  color: inherit;
+}
+.artist-card-spotify-link:hover .artist-card-spotify-name {
+  text-decoration: underline;
+}
+.artist-card-spotify .artist-card-spotify-link .artist-card-spotify-image-wrap {
+  margin-bottom: 16px;
+}
+.artist-card-spotify .artist-card-spotify-link .artist-card-spotify-name {
+  margin-bottom: 4px;
+}
+.artist-card-spotify .artist-card-spotify-link .artist-card-spotify-meta {
+  margin-bottom: 16px;
+}
+
+/* Artist overview page (Spotify-style) */
+.artist-overview-loading {
+  min-height: 40vh;
+}
+.artist-overview-error {
+  padding: 24px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.artist-overview-back {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 500px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.artist-overview-back:hover {
+  background: var(--accent-hover);
+}
+
+/* Artist overview: contained in content area with margins, rounded card (Spotify-style) */
+.artist-overview {
+  padding-bottom: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+.artist-overview-header {
+  position: relative;
+  min-height: 280px;
+  padding: 24px 24px 48px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(180deg, rgba(80, 60, 100, 0.6) 0%, var(--bg-base) 100%);
+  border-radius: 8px 8px 0 0;
+}
+.artist-overview-header.has-image {
+  background-size: cover;
+  background-position: 50% 20%;
+}
+.artist-overview-header-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 50%, var(--bg-base) 100%);
+  pointer-events: none;
+}
+.artist-overview-header-content {
+  position: relative;
+  z-index: 1;
+}
+.artist-overview-name {
+  margin: 0 0 8px 0;
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+.artist-overview-monthly-listeners {
+  margin: 20px 0 0 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.artist-overview-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 24px 16px;
+  background: var(--bg-base);
+}
+.artist-overview-play-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, background 0.2s;
+}
+.artist-overview-play-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+.artist-overview-play-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
+}
+.artist-overview-action-bar-image {
+  width: 40px;
+  height: 45px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+  border: 2px solid #e0e0e0;
+}
+
+.artist-overview-shuffle-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+.artist-overview-shuffle-btn {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.artist-overview-shuffle-btn:hover {
+  color: var(--text-primary);
+}
+.artist-overview-shuffle-btn.is-on {
+  color: var(--accent);
+}
+.artist-overview-follow-btn {
+  padding: 8px 24px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 500px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--text-secondary);
+  cursor: pointer;
+}
+.artist-overview-follow-btn:hover {
+  border-color: var(--text-primary);
+  transform: scale(1.02);
+}
+.artist-overview-more-wrap {
+  position: relative;
+  margin-left: auto;
+}
+.artist-overview-more-btn {
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.artist-overview-more-btn:hover {
+  color: var(--text-primary);
+}
+.artist-overview-context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  padding: 4px 0;
+  background: var(--bg-elevated, #282828);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+.artist-overview-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.artist-overview-context-menu-item:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+}
+.artist-overview-context-menu-item--label {
+  cursor: default;
+  color: var(--text-secondary);
+}
+.artist-overview-context-menu-item--label:hover {
+  background: none;
+}
+.artist-overview-context-menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+.artist-overview-context-menu-icon svg {
+  display: block;
+}
+.artist-overview-context-menu-icon--unfollow {
+  color: var(--accent, #1db954);
+}
+
+.artist-overview-popular {
+  padding: 0 24px 32px;
+  background: var(--bg-base);
+  border-radius: 0 0 8px 8px;
+}
+.artist-overview-popular-title {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.artist-overview-track-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Track name 50%, play count 25%, rank/artwork/duration share remaining 25% (≈8.33% each), more button */
+.artist-overview-track-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 6fr 3fr 1fr 32px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  min-height: 56px;
+  cursor: pointer;
+}
+.artist-overview-track-row:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.artist-overview-track-rank {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, "SF Mono", "Roboto Mono", "Consolas", monospace);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.artist-overview-track-row > .artist-overview-track-artwork {
+  justify-self: start;
+}
+.artist-overview-track-artwork {
+  width: 56px;
+  height: 56px;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--bg-hover);
+}
+.artist-overview-track-artwork.placeholder {
+  background: linear-gradient(135deg, #333 0%, #555 100%);
+}
+.artist-overview-track-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: center;
+}
+.artist-overview-track-name {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.artist-overview-track-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.artist-overview-track-plays-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+.artist-overview-track-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.artist-overview-track-row:hover .artist-overview-track-add-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+.artist-overview-track-add-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover, rgba(255, 255, 255, 0.1));
+}
+.artist-overview-track-add-btn svg {
+  display: block;
+}
+.artist-overview-track-plays {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+.artist-overview-track-row:hover .artist-overview-track-plays {
+  color: var(--text-primary);
+}
+.artist-overview-track-duration {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: right;
+  min-width: 3ch;
+}
+.artist-overview-track-row:hover .artist-overview-track-duration {
+  color: var(--text-primary);
+}
+
+.artist-overview-track-more-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.artist-overview-track-more-btn {
+  padding: 6px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.artist-overview-track-row:hover .artist-overview-track-more-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+.artist-overview-track-more-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover, rgba(255, 255, 255, 0.1));
+}
+.artist-overview-track-context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  padding: 4px 0;
+  background: var(--bg-elevated, #282828);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}

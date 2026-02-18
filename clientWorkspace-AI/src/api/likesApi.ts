@@ -52,3 +52,7 @@ export async function getMyLikes(params?: QueryLikesParams, signal?: AbortSignal
 export async function addLike(input: AddLikeInput): Promise<void> {
   await httpClient.post('/users/me/likes', input);
 }
+
+export async function removeLike(input: AddLikeInput): Promise<void> {
+  await httpClient.delete('/users/me/likes', { data: input });
+}
