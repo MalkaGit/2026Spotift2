@@ -4,6 +4,8 @@ import { ForbiddenError, NotFoundError } from "@mycompanyname/lib-common";
 import { ArtistEntity, ArtistStatEntity } from "./artists.repository";
 import { ArtistOverviewQueryInput, ArtistOverviewOutput } from "./types";
 import { ArtistsErrorCode } from "./artists.error.codes";
+import * as likesService from "../../likes";
+import { LIKED_ENTITY_ARTIST } from "../../likes/types";
 
 
 /**
@@ -41,13 +43,14 @@ export async function deleteArtist(
 
 
 /**
- * Operation: Get artist overview with stats information.
+ * Operation: Get artist overview with  like and stats information.
  *
  * Notes:
  * - User authentication is handled by JWT middleware (userId extracted from token).
  * - Structural validation (defaults, ranges) is handled by request validation middleware.
  * - Authorization: only users with "listener" role can access this overview.
  *
+ * @param userId - Authenticated user ID (from request context)
  * @param artistId - Artist UUID
  * @param query - Query input (e.g. topTracksLimit)
  * @returns ArtistOverviewOutput for the given artist
@@ -56,6 +59,7 @@ export async function deleteArtist(
  * @throws NotFoundError if artist does not exist or is soft-deleted
  */
 export async function getArtistOverview(
+  userId: string,
   artistId: string,
   query: ArtistOverviewQueryInput
 ): Promise<ArtistOverviewOutput> {
@@ -72,10 +76,11 @@ export async function getArtistOverview(
     );
   }
 
-  // BL: Get artist stats and top tracks (using artist repository !)
-  const [artistStats, artistTopTracks] = await Promise.all([
-    artistsRepo.getArtistStats(artistId),
-    artistsRepo.getArtistTopTracks(artistId, query.topTracksLimit),
+  // BL: Get is liked (via likesService), artist stats, and top tracks
+  const [isLiked, artistStats, artistTopTracks] = await Promise.all([
+    likesService.likeExists(userId, LIKED_ENTITY_ARTIST, artistId),         //:-) artist service calling likes service keeps boundary clear - no need to know how likes are implemented
+    artistsRepo.getArtistStats(artistId),                                    //:-) artist service calling artist repository keeps boundary clear - no need to know how artist stats are implemented
+    artistsRepo.getArtistTopTracks(artistId, query.topTracksLimit),          //:-) artist service calling artist repository keeps boundary clear - no need to know how artist top tracks are implemented
   ]);
 
   // BL: Create overview output
@@ -84,6 +89,7 @@ export async function getArtistOverview(
     artistName: artist.name,
     headerImageUrl: artist.headerImageUrl,
     actionBarImageUrl: artist.actionBarImageUrl,
+    isLiked,
     monthlyListeners: artistStats?.monthlyListeners ?? 0,
     topTracks: artistTopTracks,
   };

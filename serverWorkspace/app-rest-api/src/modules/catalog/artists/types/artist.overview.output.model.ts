@@ -28,6 +28,9 @@ export interface ArtistOverviewOutput {
   /** URL for the small image next to Play button (action bar) */
   actionBarImageUrl: string | null;
 
+  /** Whether the current authenticated user has liked this artist (derived from likes module) */
+  isLiked: boolean;
+
   /** Current monthly listeners for the artist (from artist_stats) */
   monthlyListeners: number;
 

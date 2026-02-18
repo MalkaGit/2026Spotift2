@@ -34,7 +34,7 @@ export async function deleteArtist(
 
 /**
  * GET /artists/:id/overview
- * Returns an artist overview with stats information.
+ * Returns an artist overview with like and stats information.
  *
  * @requires Authentication - JWT token required
  * @returns 200 OK with ArtistOverviewOutput body
@@ -46,11 +46,12 @@ export async function getArtistOverview(
   next: NextFunction
 ) {
   try {
+    const userId: string = requestContext.getUserId()!;
     const artistId: string = req.params.id;
     const query: ArtistOverviewQueryInput = req.validatedQuery!;
 
     const overview: ArtistOverviewOutput =
-      await artistsService.getArtistOverview(artistId, query);
+      await artistsService.getArtistOverview(userId, artistId, query);
 
     res.status(200).json(overview);
   } catch (err) {
