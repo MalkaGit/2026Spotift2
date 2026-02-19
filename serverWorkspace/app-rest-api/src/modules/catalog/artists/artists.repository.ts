@@ -161,7 +161,7 @@ export async function getArtistStats(
  * @param artistId - Artist UUID
  * @param limit - Maximum number of tracks to return
  */
-export async function getArtistTopTracks(
+export async function getArtistTopTracks_V1_join(
   artistId: string,
   limit: number
 ): Promise<ArtistOverviewTrackItem[]> {
@@ -206,6 +206,50 @@ export async function getArtistTopTracks(
   }));
 }
 
+/**
+ * Get top tracks for a given artist from the denromalzied projection table (no join).
+ * v2 – single table read from artist_top_tracks_denorm.
+ *
+ * @param artistId - Artist UUID
+ * @param limit - Maximum number of tracks to return
+ */
+export async function getArtistTopTracks_v2_denorm(
+  artistId: string,
+  limit: number
+): Promise<ArtistOverviewTrackItem[]> {
+  const sql = `
+    SELECT
+      track_id AS id,
+      track_name AS trackName,
+      total_plays AS totalPlays,
+      duration_ms AS durationMs,
+      album_id AS albumId,
+      album_image_url AS imageUrl
+    FROM artist_top_tracks_denorm
+    WHERE artist_id = ?
+    ORDER BY total_plays DESC
+    LIMIT ?
+  `;
+  const params = [artistId, limit];
+
+  logger.debug("artists.getArtistTopTracksFromProjection - SQL query", {
+    sql: sql.replace(/\s+/g, " ").trim(),
+    params,
+  });
+
+  const [rows] = await mysqlPool.query(sql, params);
+  const result = rows as any[];
+
+  return result.map((row, index): ArtistOverviewTrackItem => ({
+    rank: index + 1,
+    trackId: row.id,
+    trackName: row.trackName,
+    totalPlays: Number(row.totalPlays ?? 0),
+    durationMs: Number(row.durationMs ?? 0),
+    albumId: row.albumId,
+    albumImageUrl: String(row.imageUrl ?? ""),
+  }));
+}
 
 
 

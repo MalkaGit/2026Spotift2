@@ -29,9 +29,25 @@ artistsRouter.delete(
   artistsController.deleteArtist
 );
 
+
+/**
+ * GET /artists/:id/overview/v2
+ * Returns artist overview, v2 - read artist top tracks from de-normalized projection table, no join.
+ * - Same response shape as v1.
+ * Register before /:id/overview so "overview/v2" is not captured as :id.
+ */
+artistsRouter.get(
+  "/:id/overview/v2",
+  createRequestValidator({
+    params: artistParamsSchema,
+    query: ArtistOverviewQueryInputSchema,
+  }),
+  artistsController.getArtistOverviewV2
+);
+
 /**
  * GET /artists/:id/overview
- * Returns artist overview information.
+ * Returns artist overview , v1 - reading artist top tracks from normalized table via join.
  *
  * Flow: Request → Validation Middleware (params + query) → JWT Auth Middleware (app-level)
  *       → Controller → Service → Repository
@@ -39,8 +55,6 @@ artistsRouter.delete(
  *
  * Notes:
  * - This route is PROTECTED. A valid JWT must be provided in the Authorization header.
- * - App-level jwtAuthMiddleware({ publicRoutes }) handles authentication.
- * - This route is NOT in publicRoutes, so authentication is required automatically.
  * - Only users with "listener" role can access overview (enforced in service layer).
  * - Params validated by artistParamsSchema; query validated by ArtistOverviewQueryInputSchema.
  */
