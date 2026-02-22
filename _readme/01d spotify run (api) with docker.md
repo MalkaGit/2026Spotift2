@@ -1,204 +1,484 @@
-## Docker setup on Windows (for this project)
-
-This document mirrors the first guidance about Docker so you can refer back to it later.
-
-===============================================
-### 5. Run
-===============================================
-**Run:** From `serverWorkspace`:
-
-```powershell
-option1: docker compose up --build
-option2: 
-c:\dev\repos\node\2026Spotift2\serverWorkspace>
-docker compose build
-docker compose up
-
-
-===============================================
-### 1. What "Docker for deployment only" means
-===============================================
-
-- **During development (today)**:
-  - **Frontend**: run from `clientWorkspace-AI` with `npm run dev`.
-  - **Backend API**: run from `serverWorkspace/app-rest-api` with `npm run dev`.
-  - **Database**: use your existing **local MySQL** instance.
-  - Data flow: **local browser → local API → local MySQL**.
-
-- **For deployment (Docker) – this project (API-only)**:
-  - **API** runs inside a container (Node + your code baked into an image). You still use **`docker compose up`** (one service in the compose file).
-  - **MySQL** stays **external** (local or remote); the API connects via environment variables (e.g. `DB_HOST`, `DB_USER`, `DB_PASSWORD`).
-  - **Frontend** is not in Docker for now (run locally or deploy elsewhere).
-  - Data flow: **frontend (local or elsewhere) → API container → external MySQL**.
-
-Optional later: add MySQL and/or frontend to Docker (same compose or separate).
-
-The idea: keep your dev workflow simple, but have a **reproducible API runtime** using Docker and Docker Compose.
-
-
-
-
-
-===============================================
-### 2. Install Docker on Windows (Docker Desktop + WSL2)
-===============================================
-
-1. **Download Docker Desktop**
-   - Go to `https://www.docker.com/products/docker-desktop/`.
-   - Download **Docker Desktop for Windows**.
-
-2. **Run the installer**
-   - Double‑click the installer.
-   - When prompted:
-     - **Enable WSL 2 based engine**: keep this **checked**.
-     - If asked to install **WSL 2** or the **Linux kernel update package**, accept.
-   - Finish installation and reboot if requested.
-
-
-3. **First run**
-   - Start **Docker Desktop** from the Start menu.
-   - Accept the license terms.
-   - Wait until Docker shows that it is **running** (green icon).
-
-
-4. **Verify in PowerShell**
-   - Open **PowerShell** and run:
-
-     ```powershell
-     docker --version
-     docker run hello-world
-     ```
-
-   - You should see a Docker version string, and `hello-world` should print a success message after pulling the image.
-
-If any of these steps fail, capture the full error message so we can debug it.
-
-
-
-
-
-
-
-
-
-===============================================
-### 3. Core Docker concepts (for this repo)
-===============================================
-
-
-- **Dockerfile**: build
- a text file that describes how to build an image 
-
-- **.dockerignore**:  ignore 
-a text file that defines which to exclude from the image 
-to keep the **build context** small
- (e.g. exclude `node_modules`, `.env`). 
-
- - **Docker Compose (`docker-compose.yml` )**: stop\run
-  - Describes one or more services (containers) and how they connect.
-  - For this project: **one service**, **api**. You still run `docker compose up`.
-
-- **Container**: a **running instance** of an image 
-  (like a process with its own filesystem and network).
-
-- **Image**: like zip with your code 
-
-
-
-
-
-
-
-
-===============================================
-### 4. Files to add and where they go
-===============================================
-Once Docker Desktop is installed and working
- (`docker run hello-world` succeeds), 
- add these (industry-standard, minimal setup).
- 
- 
-  **All three files live in one place**: `serverWorkspace/`.
-
-| File                   | Location                             |
-|------------------------|--------------------------------------|
-| **.dockerignore**      | `serverWorkspace/.dockerignore`      |
-| **Dockerfile**         | `serverWorkspace/Dockerfile`         |
-| **docker-compose.yml** | `serverWorkspace/docker-compose.yml` |
-
-- **.dockerignore**:
- ->ignore
- In `serverWorkspace` next to the Dockerfile so it applies to the same build context.
- Exclude `node_modules`, `.env`, and other unneeded files
- so the build stays small and no secrets are copied.
-
-- **Dockerfile**:
-->build and expose API. gets env vars from caller.
- build context is `serverWorkspace`;
-  Uses a `node` base image;
- copies `app-rest-api` and `lib-common`, runs `npm install` and build; 
- exposes API port; 
- `CMD` runs the API (e.g. `npm start` → `node dist/server.js`).
-
-
-- **docker-compose.yml**: 
-One service, **api**, 
-built from `serverWorkspace/Dockerfile` with context `serverWorkspace`.
-Pass env vars so the API can connect to **external MySQL** 
-(e.g. `DB_HOST=host.docker.internal` for local MySQL on Windows).
-
-
-===============================================
-### 5. Run
-===============================================
-**Run:** From `serverWorkspace`:
-
-
-```powershell
-option1: docker compose up --build
-option2: 
-c:\dev\repos\node\2026Spotift2\serverWorkspace>
-docker compose build
-docker compose up
-```
-
-**Command 1 — docker compose build**
-
-- **What it does:** Reads the Dockerfile and `.dockerignore`, sends the build context to Docker, and creates the image (all layers: base Node, dependencies, built app). Does not start any container.
-- **Output:** Build logs (e.g. "Building api...", "=> CACHED" or "=> [1/8] FROM node:20-alpine", step-by-step progress, and finally "Successfully built ..." and "Successfully tagged serverworkspace-api:latest").
-
-**Command 2 — Run docker compose up**
-
-- **What it does:** Creates and starts the containers defined in `docker-compose.yml` (here: the API service). Uses the image built in step 1. Binds port 3000 on your PC to port 3000 in the container so you can call `http://localhost:3000`. Logs from the app appear in the terminal (foreground).
-- **Output:** Container startup messages, then the API process logs (e.g. "Server listening on port 3000"). The terminal stays attached; use Ctrl+C to stop the containers.
-
-**One-shot alternative:** `docker compose up --build` runs both steps (build if needed, then up). Use the two commands above when you want to see build and run separately.
-
----
-
-
-
-===============================================
-### 6. other commanda
-===============================================
-```see the docker process 
-c:\dev\repos\node\2026Spotift2\serverWorkspace>
-docker compose ps
-
-NAME                    IMAGE                 COMMAND                  SERVICE   CREATED         STATUS         PORTS
-serverworkspace-api-1   serverworkspace-api   "docker-entrypoint.s…"   api       3 minutes ago   Up 3 minutes   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-
-
-```Test health
-Then call the API (e.g. `http://localhost:3000`) 
-and verify it talks to your MySQL. 
-
-```start frontend
-Frontend stays local (`npm run dev` in `clientWorkspace-AI`)
-
-```browse to frontend: http://localhost:5173/
-
-```palyaround with app and see logs in the docker
-
-Optional later: add a **MySQL** service and/or a **frontend** service to the same compose file if you want the full stack in containers.
-
+{
+  "info": {
+    "_postman_id": "067f85ec-f817-4ab2-8a23-565c126ba125",
+    "name": "Spotify2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9872349"
+  },
+  "item": [
+    {
+      "name": "uc00000 health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "health"
+          ]
+        },
+        "description": "http://localhost:3000/health"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00001-register-user",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"email1@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "register"
+          ]
+        },
+        "description": "http://localhost:3000/users/register"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00002-login-user",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": " {\r\n    \"email\": \"email1@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "login"
+          ]
+        },
+        "description": "http://localhost:3000/users/login"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00003-get-user-profile",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/users/me",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "description": "http://localhost:3000/users/me"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00004-add-user-like-backend",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"entityType\": \"artist\",\r\n    \"entityId\":\"111a1e45-c1c2-4b56-a331-eba6bd9b9db8\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/me/likes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me",
+            "likes"
+          ]
+        },
+        "description": "POST http://localhost:3000/users/me/likes"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00005-query-my-like",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/users/me/likes?sort=name&offset=0&limit=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "me",
+            "likes"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "name"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "2"
+            }
+          ]
+        },
+        "description": "GET http://localhost:3000/users/me/likes"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v1-MySQL-like",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v1/artists?q=&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v1",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": ""
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "GET http://localhost:3000/search/v1/artists"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v2-MySQL-fullTextSearch-substringNOTworking",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v2/artists?q=ariana grande&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v2",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "ariana grande"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00006-search-artits--v2-MySQL-fullTextSearch-wordDOESwork",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYTQ5Y2Q3Ny0xYmMxLTQ5ZjEtYTczZS0xNGJhNzNjZjlkNjMiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzAyMDIxNjEsImV4cCI6MTc3MDIwNTc2MSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.sCPSiMabgLP1qGh0DvQim_IJNGXpUOnUwZMPyq6djsk",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/search/v2/artists?q=sheeran&offset=0&limit=5",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "search",
+            "v2",
+            "artists"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "sheeran"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00009-backend-delete-artist-using-transaction",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMDNjMzc1NS00NmY3LTQ0OTgtOGVjNS1iYzlhY2U0M2FjNDIiLCJlbWFpbCI6ImVtYWlsMkBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzA2NTg0OTAsImV4cCI6MTc3MDY2MjA5MCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.GCsui0UPMld-yrhtUMkowQxp8MRRAYZK8G_rZjErkMY",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
+          ]
+        },
+        "description": "http://localhost:3000/artists/d03c3755-46f7-4498-8ec5-bc9ace43ac42"
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZTMyZjliMy05MzU1LTRhNjQtYWVmNS0zYzJhYTQ5M2EzZmUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzEzNTE2ODksImV4cCI6MTc3MTM1NTI4OSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.REkkSt4I6HLPMZleSfjVSrjqGE9fieI8_V_Zoep8wdE",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/555a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "555a1e45-c1c2-4b56-a331-eba6bd9b9db8"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v1-join",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZTMyZjliMy05MzU1LTRhNjQtYWVmNS0zYzJhYTQ5M2EzZmUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzEzNTE4NTgsImV4cCI6MTc3MTM1NTQ1OCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.ZhlrGxfu6H-FS1qDUJT_7dCHSn6s79jlTPW4ZRounOU",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v2-join",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview",
+            "v2"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

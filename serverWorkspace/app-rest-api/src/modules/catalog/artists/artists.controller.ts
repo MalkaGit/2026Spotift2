@@ -34,7 +34,7 @@ export async function deleteArtist(
 
 /**
  * GET /artists/:id/overview
- * Returns an artist overview with like and stats information.
+ * Returns artist overview (v1) with top tracks from stat table (with join).
  *
  * @requires Authentication - JWT token required
  * @returns 200 OK with ArtistOverviewOutput body
@@ -52,6 +52,30 @@ export async function getArtistOverview(
 
     const overview: ArtistOverviewOutput =
       await artistsService.getArtistOverview(userId, artistId, query);
+
+    res.status(200).json(overview);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /artists/:id/overview/v2
+ * Returns artist overview (v2) with top tracks from projection table (no join).
+ * Same response shape as GET /artists/:id/overview.
+ */
+export async function getArtistOverviewV2(
+  req: TypedRequest<any, { id: string }, ArtistOverviewQueryInput>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId: string = requestContext.getUserId()!;
+    const artistId: string = req.params.id;
+    const query: ArtistOverviewQueryInput = req.validatedQuery!;
+
+    const overview: ArtistOverviewOutput =
+      await artistsService.getArtistOverviewV2(userId, artistId, query);
 
     res.status(200).json(overview);
   } catch (err) {

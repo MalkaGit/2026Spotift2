@@ -80,7 +80,7 @@ export async function getArtistOverview(
   const [isLiked, artistStats, artistTopTracks] = await Promise.all([
     likesService.likeExists(userId, LIKED_ENTITY_ARTIST, artistId),         //:-) artist service calling likes service keeps boundary clear - no need to know how likes are implemented
     artistsRepo.getArtistStats(artistId),                                    //:-) artist service calling artist repository keeps boundary clear - no need to know how artist stats are implemented
-    artistsRepo.getArtistTopTracks(artistId, query.topTracksLimit),          //:-) artist service calling artist repository keeps boundary clear - no need to know how artist top tracks are implemented
+    artistsRepo.getArtistTopTracks_V1_join(artistId, query.topTracksLimit),          //:-) artist service calling artist repository keeps boundary clear - no need to know how artist top tracks are implemented
   ]);
 
   // BL: Create overview output
@@ -95,6 +95,42 @@ export async function getArtistOverview(
   };
 
   return overview;
+}
+
+/**
+ * Get artist overview (v2) – top tracks from projection table, no join.
+ * Same contract as getArtistOverview; only the top-tracks data source differs.
+ */
+export async function getArtistOverviewV2(
+  userId: string,
+  artistId: string,
+  query: ArtistOverviewQueryInput
+): Promise<ArtistOverviewOutput> {
+  requireRole(["listener"]);
+
+  const artist: ArtistEntity | null = await artistsRepo.findById(artistId);
+  if (!artist) {
+    throw new NotFoundError(
+      ArtistsErrorCode.ARTIST_NOT_FOUND,
+      `Artist with id ${artistId} not found`
+    );
+  }
+
+  const [isLiked, artistStats, artistTopTracks] = await Promise.all([
+    likesService.likeExists(userId, LIKED_ENTITY_ARTIST, artistId),
+    artistsRepo.getArtistStats(artistId),
+    artistsRepo.getArtistTopTracks_v2_denorm(artistId, query.topTracksLimit),
+  ]);
+
+  return {
+    artistId: artist.id,
+    artistName: artist.name,
+    headerImageUrl: artist.headerImageUrl,
+    actionBarImageUrl: artist.actionBarImageUrl,
+    isLiked,
+    monthlyListeners: artistStats?.monthlyListeners ?? 0,
+    topTracks: artistTopTracks,
+  };
 }
 
 
