@@ -20,6 +20,21 @@ export function ArtistCard({ item, onLike }: ArtistCardProps) {
         <div className="artist-card-spotify-name">{item.name}</div>
         <div className="artist-card-spotify-meta">Artist</div>
       </Link>
+      <button
+        type="button"
+        className={`artist-card-follow-btn ${item.liked ? 'following' : ''}`}
+        aria-label={item.liked ? 'Following' : 'Follow'}
+        disabled={item.liked}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!item.liked) {
+            onLike(item);
+          }
+        }}
+      >
+        {item.liked ? 'Following' : 'Follow'}
+      </button>
     </div>
   );
 }
