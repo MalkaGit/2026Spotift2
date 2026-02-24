@@ -51,6 +51,7 @@ dotenv.config();
 
 import app from "./app";
 import { logger } from "@mycompanyname/lib-common";
+import * as workers from "./modules/analytics/v2/workers";
 
 // Register process-level error handlers BEFORE starting server
 // Handle uncaught exceptions (synchronous errors outside request/response cycle)
@@ -84,5 +85,6 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 // Start HTTP server and listen for incoming requests
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
+  workers.startTrackEventsWorker();
 });
 

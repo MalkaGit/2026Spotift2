@@ -261,36 +261,36 @@ CREATE INDEX idx_tpe_track_played_at ON track_play_events(track_id, played_at DE
 INSERT INTO albums (id, artist_id, name, image_url)
 VALUES
   -- Taylor Swift
-  ('10000000-0000-0000-0000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '1989 (Taylor''s Version)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'),
-  ('10000000-0000-0000-0000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Midnights', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
+  ('10000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '1989 (Taylor''s Version)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'),
+  ('10000000-0000-4000-8000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Midnights', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
 
   -- Drake
-  ('20000000-0000-0000-0000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Scorpion', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'),
+  ('20000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Scorpion', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'),
 
   -- Ed Sheeran
-  ('30000000-0000-0000-0000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '÷ (Divide)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'),
+  ('30000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '÷ (Divide)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'),
 
   -- Beyoncé
-  ('40000000-0000-0000-0000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Lemonade', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s');
+  ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Lemonade', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s');
 
 --  Seed tracks (id, name, duration_ms, album_id)
 INSERT INTO tracks (id, name, duration_ms, album_id)
 VALUES
   -- Taylor Swift - 1989 (Taylor's Version)
-  ('31000000-0000-0000-0000-000000000001', 'Blank Space (Taylor''s Version)', 231000, '10000000-0000-0000-0000-000000000001'),
-  ('31000000-0000-0000-0000-000000000002', 'Style (Taylor''s Version)', 231000, '10000000-0000-0000-0000-000000000001'),
+  ('31000000-0000-4000-8000-000000000001', 'Blank Space (Taylor''s Version)', 231000, '10000000-0000-4000-8000-000000000001'),
+  ('31000000-0000-4000-8000-000000000002', 'Style (Taylor''s Version)', 231000, '10000000-0000-4000-8000-000000000001'),
 
   -- Taylor Swift - Midnights
-  ('31000000-0000-0000-0000-000000000003', 'Anti-Hero', 200000, '10000000-0000-0000-0000-000000000002'),
+  ('31000000-0000-4000-8000-000000000003', 'Anti-Hero', 200000, '10000000-0000-4000-8000-000000000002'),
 
   -- Drake - Scorpion
-  ('32000000-0000-0000-0000-000000000001', 'God''s Plan', 198000, '20000000-0000-0000-0000-000000000001'),
+  ('32000000-0000-4000-8000-000000000001', 'God''s Plan', 198000, '20000000-0000-4000-8000-000000000001'),
 
   -- Ed Sheeran - ÷ (Divide)
-  ('33000000-0000-0000-0000-000000000001', 'Shape of You', 234000, '30000000-0000-0000-0000-000000000001'),
+  ('33000000-0000-4000-8000-000000000001', 'Shape of You', 234000, '30000000-0000-4000-8000-000000000001'),
 
   -- Beyoncé - Lemonade
-  ('34000000-0000-0000-0000-000000000001', 'Formation', 215000, '40000000-0000-0000-0000-000000000001');
+  ('34000000-0000-4000-8000-000000000001', 'Formation', 215000, '40000000-0000-4000-8000-000000000001');
 
 --  Seed artist_stats (artist_id, monthly_listeners)
 INSERT INTO artist_stats (artist_id, monthly_listeners)
@@ -303,11 +303,11 @@ VALUES
 --  Seed artist_top_tracks_stats (artist_id, track_id, total_plays)
 INSERT INTO artist_top_tracks_stats (artist_id, track_id, total_plays)
 VALUES
-  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-0000-0000-000000000001', 1500000000), -- Taylor Swift - Blank Space
-  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-0000-0000-000000000003', 1200000000), -- Taylor Swift - Anti-Hero
-  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '32000000-0000-0000-0000-000000000001', 1800000000), -- Drake - God's Plan
-  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '33000000-0000-0000-0000-000000000001', 2100000000), -- Ed Sheeran - Shape of You
-  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '34000000-0000-0000-0000-000000000001', 800000000);  -- Beyoncé - Formation
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000001', 1500000000), -- Taylor Swift - Blank Space
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000003', 1200000000), -- Taylor Swift - Anti-Hero
+  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '32000000-0000-4000-8000-000000000001', 1800000000), -- Drake - God's Plan
+  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '33000000-0000-4000-8000-000000000001', 2100000000), -- Ed Sheeran - Shape of You
+  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '34000000-0000-4000-8000-000000000001', 800000000);  -- Beyoncé - Formation
 
 --  Backfill artist_top_tracks_denorm from join (artist_top_tracks_stats + tracks + albums)
 INSERT INTO artist_top_tracks_denorm (artist_id, track_id, track_name, duration_ms, album_id, album_image_url, total_plays)
@@ -320,8 +320,8 @@ JOIN albums al ON al.id = t.album_id AND al.deleted_at IS NULL;
 INSERT INTO track_play_events (user_id, track_id, artist_id, played_at)
 VALUES
   -- Admin user playing various tracks
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-0000-0000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 2 DAY),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-0000-0000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 1 DAY),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '32000000-0000-0000-0000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 3 HOUR),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '33000000-0000-0000-0000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 90 MINUTE),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '34000000-0000-0000-0000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 10 MINUTE);
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 2 DAY),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 1 DAY),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '32000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 3 HOUR),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '33000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 90 MINUTE),
+  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '34000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 10 MINUTE);
