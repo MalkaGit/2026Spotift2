@@ -446,6 +446,73 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v2-join",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview",
+            "v2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00011-play-track-v2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxYzkxYjVlZi1mMmY1LTQ3NGMtYTc4MC02NzVlMTg1NjljMWUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE3OTIwMDUsImV4cCI6MTc3MTc5NTYwNSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.5vFn03lDR8aoGDrR2BvXLUHU0q38spKs7qSZKRzw-uQ",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/analytics/v2/tracks/32000000-0000-4000-8000-000000000001/play",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "analytics",
+            "v2",
+            "tracks",
+            "32000000-0000-4000-8000-000000000001",
+            "play"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
