@@ -91,6 +91,7 @@ export async function getArtistOverview(
     actionBarImageUrl: artist.actionBarImageUrl,
     isLiked,
     monthlyListeners: artistStats?.monthlyListeners ?? 0,
+    totalPlays: artistStats?.totalPlays ?? 0,
     topTracks: artistTopTracks,
   };
 
@@ -129,6 +130,7 @@ export async function getArtistOverviewV2(
     actionBarImageUrl: artist.actionBarImageUrl,
     isLiked,
     monthlyListeners: artistStats?.monthlyListeners ?? 0,
+    totalPlays: artistStats?.totalPlays ?? 0,
     topTracks: artistTopTracks,
   };
 }
