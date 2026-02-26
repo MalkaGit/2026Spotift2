@@ -41,6 +41,7 @@ import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
 import { artistsRouter } from "./modules/catalog/artists";
 import { tracksAnalyticsRouter as tracksAnalyticsV2Router } from "./modules/analytics/v2/api/tracks";
+import { tracksAnalyticsRouter as tracksAnalyticsV3Router} from "./modules/analytics/v3/api/tracks";
 import { searchRouter as searchV1Router } from "./modules/search/v1";
 import { searchRouter as searchV2Router } from "./modules/search/v2";
 
@@ -88,6 +89,7 @@ app.use("/search/v1", searchV1Router);
 app.use("/search/v2", searchV2Router);
 app.use("/artists", artistsRouter);
 app.use("/analytics/v2/tracks", tracksAnalyticsV2Router);
+app.use("/analytics/v3/tracks", tracksAnalyticsV3Router);
 
 // Error Middleware (MUST be last - catches all errors from routes above)
 app.use(errorMiddleware);
