@@ -1,14 +1,20 @@
 import { requireAuthenticated } from "@mycompanyname/lib-common";
 import * as tracksRepo from "./tracks.repository";
-import { tracksService  } from "../../../../catalog/tracks";
-import { Track } from "../../../../catalog/tracks/types/track.model";
+import { tracksService } from "../../../../catalog/tracks";
 
 /**
- * Record a play event for a track.
- * 
+ * Record a play event for a track. Writes one row to track_events (one row per play).
+ *
+ * We normally enrich events at ingest (e.g. add artist_id to the event table or message), since that
+ * avoids extra lookups in the worker (or queue consumer). When enrichment would create multiple rows
+ * or messages per logical occurrence, we skip it at ingest and enrich in the worker instead. A track
+ * can have many artists (track_artists); adding artist_id at ingest would mean multiple rows per play,
+ * making downstream processing harder (e.g. counting track total plays when reading batches). So we do not
+ * store artist_id here—one play, one row. The worker joins with track_artists to attribute plays to artists.
+ *
  * @param userId - Authenticated user ID (from request context)
  * @param trackId - Track UUID (from path)
- * @throws NotFoundError if track does not exist or is soft-deleted (or its album/artist)
+ * @throws NotFoundError if track does not exist or is soft-deleted (or its album)
  */
 export async function recordTrackPlayEvent(
   userId: string,
@@ -16,6 +22,6 @@ export async function recordTrackPlayEvent(
 ): Promise<void> {
   requireAuthenticated();
 
-  const track: Track = await tracksService.getTrackById(trackId);  //Exception is thrown if track does not exist or is soft-deleted (or its album/artist)
-  await tracksRepo.createTrackPlayEvent(userId, trackId, track.artistId);
+  await tracksService.getTrackById(trackId); // validate track exists (404 if not)
+  await tracksRepo.createTrackPlayEvent(userId, trackId);
 }

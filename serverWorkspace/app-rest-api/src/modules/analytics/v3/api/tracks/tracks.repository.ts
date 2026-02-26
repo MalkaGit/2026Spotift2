@@ -1,18 +1,17 @@
+//Write to events table
 import { mysqlPool, logger } from "@mycompanyname/lib-common";
 
 /**
- * Insert a row into track_play_events. played_at defaults to CURRENT_TIMESTAMP.
+ * Insert one 'play' event row into track_events (one row per play). occurred_at defaults to CURRENT_TIMESTAMP.
  */
 export async function createTrackPlayEvent(
   userId: string,
-  trackId: string,
-  artistId: string
+  trackId: string
 ): Promise<void> {
   const sql = `
-    INSERT INTO track_play_events (user_id, track_id, artist_id)
-    VALUES (?, ?, ?)
+    INSERT INTO track_events (event_type, user_id, track_id)
+    VALUES ('play', ?, ?)
   `;
-  const params = [userId, trackId, artistId];
-  logger.debug("createTrackPlayEvent", { sql, params });
-  await mysqlPool.query(sql, params);
+  logger.debug("createTrackPlayEvent", { trackId });
+  await mysqlPool.query(sql, [userId, trackId]);
 }
