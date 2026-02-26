@@ -4,7 +4,7 @@ import type { Track } from "./types/track.model";
 import { TrackErrorCode } from "./tracks.error.codes";
 
 /**
- * Get track by id. Throws NotFoundError if track or album is not found or soft-deleted.
+ * Returns the track by id. Throws NotFoundError if track or album is not found or soft-deleted.
  */
 export async function getTrackById(trackId: string): Promise<Track> {
   const track = await trackRepo.getTrackById(trackId);
@@ -15,4 +15,12 @@ export async function getTrackById(trackId: string): Promise<Track> {
     );
   }
   return track;
+}
+
+/**
+ * Returns artist ids for a track.
+ * Empty array if the track has no rows in track_artists. Used when recording a play in analytics.
+ */
+export async function getArtistIdsForTrack(trackId: string): Promise<string[]> {
+  return trackRepo.getArtistIdsForTrack(trackId);
 }

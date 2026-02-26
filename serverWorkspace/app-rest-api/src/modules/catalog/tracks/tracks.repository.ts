@@ -23,3 +23,18 @@ export async function getTrackById(trackId: string): Promise<Track | null> {
     artistId: row.artistId,
   };
 }
+
+/**
+ * Returns artist ids for a track from track_artists (ordered by artist_id).
+ * Used by analytics when recording a play: one track_events row is written per artist.
+ */
+export async function getArtistIdsForTrack(trackId: string): Promise<string[]> {
+  const sql = `
+    SELECT artist_id
+    FROM track_artists
+    WHERE track_id = ?
+    ORDER BY artist_id
+  `;
+  const [rows] = await mysqlPool.query(sql, [trackId]);
+  return (rows as { artist_id: string }[]).map((r) => r.artist_id);
+}
