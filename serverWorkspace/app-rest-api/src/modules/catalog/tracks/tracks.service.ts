@@ -19,8 +19,19 @@ export async function getTrackById(trackId: string): Promise<Track> {
 
 /**
  * Returns artist ids for a track.
- * Empty array if the track has no rows in track_artists. Used when recording a play in analytics.
+ * Empty array if the track has no rows in track_artists.
  */
 export async function getArtistIdsForTrack(trackId: string): Promise<string[]> {
   return trackRepo.getArtistIdsForTrack(trackId);
+}
+
+/**
+ * Returns artist ids for the given track ids  for the given track ids. 
+ * Empty input → empty Map.
+ * Used by analytics worker to expand play events via track_artists.
+ */
+export async function getArtistIdsByTrackIds(
+  trackIds: string[]
+): Promise<Map<string, string[]>> {
+  return trackRepo.getArtistIdsByTrackIds(trackIds);
 }

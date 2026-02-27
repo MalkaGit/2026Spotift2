@@ -172,6 +172,25 @@ CREATE INDEX idx_track_album ON tracks(album_id);
 CREATE INDEX idx_track_album_name ON tracks(album_id, name);
 
 --  ========================================
+--  track_artists TABLE (many-to-many: track can have several artists)
+--  Every track must have at least one row. Analytics uses this as single source of truth (no fallback to album).
+--  ========================================
+DROP TABLE IF EXISTS track_artists;
+
+CREATE TABLE track_artists (
+  track_id CHAR(36) NOT NULL,
+  artist_id CHAR(36) NOT NULL,
+  role VARCHAR(32) NULL,
+  PRIMARY KEY (track_id, artist_id),
+  CONSTRAINT fk_track_artists_track FOREIGN KEY (track_id)
+    REFERENCES tracks(id) ON DELETE CASCADE,
+  CONSTRAINT fk_track_artists_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_track_artists_artist ON track_artists(artist_id);
+
+--  ========================================
 --  artist_stats TABLE (per-artist aggregate stats)
 --  ========================================
 DROP TABLE IF EXISTS artist_stats;
@@ -179,6 +198,7 @@ DROP TABLE IF EXISTS artist_stats;
 CREATE TABLE artist_stats (
   artist_id CHAR(36) NOT NULL PRIMARY KEY,  -- FK → artists.id
   monthly_listeners BIGINT NOT NULL,
+  total_plays BIGINT NOT NULL DEFAULT 0,   -- all-time play count for this artist (from track_events)
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_artist_stats_artist FOREIGN KEY (artist_id)
     REFERENCES artists(id)       -- NO CASCADE: keep historical stats even if artist is soft-deleted
@@ -230,28 +250,55 @@ CREATE TABLE artist_top_tracks_denorm (
 CREATE INDEX idx_artist_top_tracks_denorm_artist_plays ON artist_top_tracks_denorm(artist_id, total_plays DESC);
 
 --  ========================================
---  track_play_events TABLE (denormalized play events)
+--  track_stats TABLE (per-track play count; populated by v3 worker)
 --  ========================================
-DROP TABLE IF EXISTS track_play_events;
+DROP TABLE IF EXISTS track_stats;
 
-CREATE TABLE track_play_events (
-  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user_id CHAR(36) NOT NULL,       -- FK → users.id
-  track_id CHAR(36) NOT NULL,      -- FK → tracks.id
-  artist_id CHAR(36) NOT NULL,     -- FK → artists.id (denormalized)
-  played_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_tpe_user FOREIGN KEY (user_id)
-    REFERENCES users(id),         -- NO CASCADE: keep historical play events even if user is soft-deleted
-  CONSTRAINT fk_tpe_track FOREIGN KEY (track_id)
-    REFERENCES tracks(id),        -- NO CASCADE: keep historical play events even if track is soft-deleted
-  CONSTRAINT fk_tpe_artist FOREIGN KEY (artist_id)
-    REFERENCES artists(id)        -- NO CASCADE: keep historical play events even if artist is soft-deleted
+CREATE TABLE track_stats (
+  track_id CHAR(36) NOT NULL PRIMARY KEY,  -- FK → tracks.id
+  total_count BIGINT NOT NULL DEFAULT 0,    -- all-time play count for this track
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_track_stats_track FOREIGN KEY (track_id)
+    REFERENCES tracks(id)  -- NO CASCADE: keep historical stats even if track is soft-deleted
 ) ENGINE=InnoDB;
 
--- Common analytics and query patterns
-CREATE INDEX idx_tpe_user_played_at ON track_play_events(user_id, played_at DESC);
-CREATE INDEX idx_tpe_artist_played_at ON track_play_events(artist_id, played_at DESC);
-CREATE INDEX idx_tpe_track_played_at ON track_play_events(track_id, played_at DESC);
+--  ========================================
+--  track_events TABLE
+--  ========================================
+--  We normally enrich events at ingest (e.g. add artist_id to the event table or message), since that
+--  avoids extra lookups in the worker. When enrichment would create multiple rows or messages per
+--  logical occurrence, we skip it at ingest and enrich in the worker instead. A track can have many
+--  artists (track_artists); adding artist_id at ingest would mean multiple rows per play, making
+--  downstream processing harder (e.g. counting track total plays when reading batches). So we do not
+--  add artist_id: one play, one row. The worker joins with track_artists to attribute plays to artists.
+--  ========================================
+DROP TABLE IF EXISTS track_events;
+
+CREATE TABLE track_events (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  event_type VARCHAR(32) NOT NULL, -- e.g. 'play', 'pause', 'skip'
+  user_id CHAR(36) NOT NULL,       -- FK → users.id
+  track_id CHAR(36) NOT NULL,      -- FK → tracks.id
+  occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_te_user FOREIGN KEY (user_id)
+    REFERENCES users(id),         -- NO CASCADE: keep historical events even if user is soft-deleted
+  CONSTRAINT fk_te_track FOREIGN KEY (track_id)
+    REFERENCES tracks(id)        -- NO CASCADE: keep historical events even if track is soft-deleted
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_track_events_play_track_time
+  ON track_events (event_type, track_id, occurred_at DESC);
+
+--  ========================================
+--  track_events_checkpoint TABLE (v3 incremental worker)
+--  ========================================
+DROP TABLE IF EXISTS track_events_checkpoint;
+
+CREATE TABLE track_events_checkpoint (
+  worker_id VARCHAR(64) NOT NULL PRIMARY KEY,
+  last_processed_event_id BIGINT NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
 --  ========================================
 --  Seed albums, tracks, and stats
@@ -292,36 +339,57 @@ VALUES
   -- Beyoncé - Lemonade
   ('34000000-0000-4000-8000-000000000001', 'Formation', 215000, '40000000-0000-4000-8000-000000000001');
 
---  Seed artist_stats (artist_id, monthly_listeners)
-INSERT INTO artist_stats (artist_id, monthly_listeners)
+--  Seed track_artists (every track has ≥1 artist; one track has 2 artists for multi-artist verification)
+INSERT INTO track_artists (track_id, artist_id, role)
 VALUES
-  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 95000000),  -- Taylor Swift
-  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 72000000),  -- Drake
-  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 68000000),  -- Ed Sheeran
-  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 55000000);  -- Beyoncé
+  -- Taylor Swift - 1989
+  ('31000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  ('31000000-0000-4000-8000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Anti-Hero: Taylor Swift + Ed Sheeran (featured) – multi-artist example
+  ('31000000-0000-4000-8000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  ('31000000-0000-4000-8000-000000000003', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'featured'),
+  -- Drake
+  ('32000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Ed Sheeran
+  ('33000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Beyoncé
+  ('34000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary');
 
---  Seed artist_top_tracks_stats (artist_id, track_id, total_plays)
+--  Seed artist_stats (artist_id, monthly_listeners, total_plays) – all with total_plays 1
+INSERT INTO artist_stats (artist_id, monthly_listeners, total_plays)
+VALUES
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 0, 1),
+  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 0, 1),
+  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 0, 1),
+  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 0, 1);
+
+--  Seed artist_top_tracks_stats (artist_id, track_id, total_plays) – all with total_plays 1
 INSERT INTO artist_top_tracks_stats (artist_id, track_id, total_plays)
 VALUES
-  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000001', 1500000000), -- Taylor Swift - Blank Space
-  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000003', 1200000000), -- Taylor Swift - Anti-Hero
-  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '32000000-0000-4000-8000-000000000001', 1800000000), -- Drake - God's Plan
-  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '33000000-0000-4000-8000-000000000001', 2100000000), -- Ed Sheeran - Shape of You
-  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '34000000-0000-4000-8000-000000000001', 800000000);  -- Beyoncé - Formation
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000001', 1),
+  ('111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '31000000-0000-4000-8000-000000000003', 1),
+  ('222a1e45-c1c2-4b56-a331-eba6bd9b9db8', '32000000-0000-4000-8000-000000000001', 1),
+  ('333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '33000000-0000-4000-8000-000000000001', 1),
+  ('444a1e45-c1c2-4b56-a331-eba6bd9b9db8', '34000000-0000-4000-8000-000000000001', 1);
 
---  Backfill artist_top_tracks_denorm from join (artist_top_tracks_stats + tracks + albums)
+--  Backfill artist_top_tracks_denorm from join (artist_top_tracks_stats + tracks + albums); total_plays comes from stats (1)
 INSERT INTO artist_top_tracks_denorm (artist_id, track_id, track_name, duration_ms, album_id, album_image_url, total_plays)
 SELECT ats.artist_id, ats.track_id, t.name, t.duration_ms, al.id, al.image_url, ats.total_plays
 FROM artist_top_tracks_stats ats
 JOIN tracks t ON t.id = ats.track_id AND t.deleted_at IS NULL
 JOIN albums al ON al.id = t.album_id AND al.deleted_at IS NULL;
 
---  Seed track_play_events (user_id, track_id, artist_id, played_at)
-INSERT INTO track_play_events (user_id, track_id, artist_id, played_at)
+--  Seed track_events (one row per play)
+INSERT INTO track_events (event_type, user_id, track_id, occurred_at)
 VALUES
-  -- Admin user playing various tracks
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 2 DAY),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 1 DAY),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '32000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 3 HOUR),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '33000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 90 MINUTE),
-  ('c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '34000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', NOW() - INTERVAL 10 MINUTE);
+  ('play', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000001', NOW() - INTERVAL 2 DAY),
+  ('play', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '31000000-0000-4000-8000-000000000003', NOW() - INTERVAL 1 DAY),
+  ('play', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '32000000-0000-4000-8000-000000000001', NOW() - INTERVAL 3 HOUR),
+  ('play', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '33000000-0000-4000-8000-000000000001', NOW() - INTERVAL 90 MINUTE),
+  ('play', 'c636cfc0-4ac9-455f-a510-013ab1e2ccc4', '34000000-0000-4000-8000-000000000001', NOW() - INTERVAL 10 MINUTE);
+
+--  Populate track_stats: one row per track with total_count 1 (v3 worker maintains this incrementally)
+INSERT INTO track_stats (track_id, total_count)
+SELECT id, 1
+FROM tracks
+WHERE deleted_at IS NULL;

@@ -51,7 +51,8 @@ dotenv.config();
 
 import app from "./app";
 import { logger } from "@mycompanyname/lib-common";
-import * as workers from "./modules/analytics/v2/workers";
+import * as workersV2 from "./modules/analytics/v2/workers";  //V2 full rebuild: each time interval triggers, we rebuild all projection tables from scatch
+import * as workersV3 from "./modules/analytics/v3/workers";  //V3 incremental rebuild:  each time interval triggers, we do deltea updates + rebuild artist monthly listeners every 10 ticks
 
 // Register process-level error handlers BEFORE starting server
 // Handle uncaught exceptions (synchronous errors outside request/response cycle)
@@ -85,6 +86,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 // Start HTTP server and listen for incoming requests
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
-  workers.startTrackEventsWorker();
+  workersV3.trackEventsWorker.start();
+ 
 });
 
