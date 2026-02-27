@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getArtistOverview } from '@/api/artistsApi';
 import type { ArtistOverviewOutput, ArtistOverviewTrackItem } from '@/types/ArtistOverview';
 import { addLike, removeLike } from '@/api/likesApi';
+import { recordTrackPlay } from '@/api/tracksApi';
 import { useLibraryContext } from '@/context/LibraryContext';
 
 function formatMonthlyListeners(n: number): string {
@@ -228,6 +229,7 @@ export function ArtistOverviewPage() {
               onSelectRow={() => setSelectedTrackId((id) => (id === track.trackId ? null : track.trackId))}
               onOpenMenu={() => setTrackMenuTrackId((id) => (id === track.trackId ? null : track.trackId))}
               onCloseMenu={() => setTrackMenuTrackId(null)}
+              onPlayTrack={() => recordTrackPlay(track.trackId)}
             />
           ))}
         </ul>
@@ -243,6 +245,7 @@ function TrackRow({
   onSelectRow,
   onOpenMenu,
   onCloseMenu,
+  onPlayTrack,
 }: {
   track: ArtistOverviewTrackItem;
   isSelected: boolean;
@@ -250,6 +253,7 @@ function TrackRow({
   onSelectRow: () => void;
   onOpenMenu: () => void;
   onCloseMenu: () => void;
+  onPlayTrack: () => void;
 }) {
   const rowMenuRef = useRef<HTMLDivElement>(null);
 
@@ -281,7 +285,20 @@ function TrackRow({
       }}
       aria-pressed={isSelected}
     >
-      <span className="artist-overview-track-rank">{track.rank}</span>
+      <button
+        type="button"
+        className="artist-overview-track-rank-cell"
+        aria-label={`Play ${track.trackName}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlayTrack();
+        }}
+      >
+        <span className="artist-overview-track-rank-num">{track.rank}</span>
+        <span className="artist-overview-track-rank-play" aria-hidden>
+          <img src="/icons/play.svg" alt="" width="20" height="20" />
+        </span>
+      </button>
       <img
         src={track.albumImageUrl || ''}
         alt=""
