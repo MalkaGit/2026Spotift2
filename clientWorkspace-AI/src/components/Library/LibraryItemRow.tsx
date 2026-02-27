@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import type { LikesItem } from '@/types';
 import { useArtistImageFallback } from '@/hooks/useArtistImageFallback';
 
@@ -49,9 +49,10 @@ export function LibraryItemRow({ item, compact, isSelected, onSelect }: LibraryI
     );
     const imageUrl = item.likedEntityImageUrl ?? (item.likedEntityType === 'artist' ? fallbackUrl : undefined);
     const compactClass = `list-row list-row-compact${isSelected ? ' active' : ''}`;
+    const to = item.likedEntityType === 'artist' ? `/artist/${item.likedEntityId}` : '/library';
     return (
       <NavLink
-        to="/library"
+        to={to}
         className={() => compactClass}
         onClick={onSelect}
       >
@@ -72,8 +73,9 @@ export function LibraryItemRow({ item, compact, isSelected, onSelect }: LibraryI
     );
   }
 
-  return (
-    <div className="list-row">
+  const isArtist = item.likedEntityType === 'artist';
+  const rowContent = (
+    <>
       <span className="list-row-type" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
         {typeLabel}
       </span>
@@ -83,6 +85,16 @@ export function LibraryItemRow({ item, compact, isSelected, onSelect }: LibraryI
       <span className="list-row-date" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
         {dateStr}
       </span>
-    </div>
+    </>
   );
+
+  if (isArtist) {
+    return (
+      <Link to={`/artist/${item.likedEntityId}`} className="list-row list-row-link">
+        {rowContent}
+      </Link>
+    );
+  }
+
+  return <div className="list-row">{rowContent}</div>;
 }

@@ -567,6 +567,12 @@ a:hover {
   background: var(--bg-hover);
 }
 
+.list-row.list-row-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .artist-card {
   display: flex;
   align-items: center;
@@ -1068,13 +1074,46 @@ a:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
-.artist-overview-track-rank {
+.artist-overview-track-rank-cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  border-radius: 4px;
+}
+.artist-overview-track-rank-cell:hover {
+  background: var(--bg-hover);
+}
+.artist-overview-track-rank-num {
   font-size: 1.0625rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono, "SF Mono", "Roboto Mono", "Consolas", monospace);
   color: var(--text-secondary);
-  text-align: center;
+}
+.artist-overview-track-rank-play {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inset: 0;
+  opacity: 0;
+}
+.artist-overview-track-rank-play img {
+  filter: brightness(0) invert(1);
+}
+.artist-overview-track-rank-cell:hover .artist-overview-track-rank-num {
+  opacity: 0;
+}
+.artist-overview-track-rank-cell:hover .artist-overview-track-rank-play {
+  opacity: 1;
 }
 .artist-overview-track-row > .artist-overview-track-artwork {
   justify-self: start;
