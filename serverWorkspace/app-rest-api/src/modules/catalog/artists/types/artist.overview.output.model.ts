@@ -34,6 +34,9 @@ export interface ArtistOverviewOutput {
   /** Current monthly listeners for the artist (from artist_stats) */
   monthlyListeners: number;
 
+  /** All-time total play count for the artist (from artist_stats) */
+  totalPlays: number;
+
   /** Artist's top tracks with aggregate stats */
   topTracks: ArtistOverviewTrackItem[];
 }

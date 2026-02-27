@@ -99,17 +99,19 @@ export async function deleteByIdCascade(artistId: string): Promise<void> {
 
 /**
  * Entity matching the artist_stats table schema.
- * Table: artist_stats (artist_id PK → artists.id, monthly_listeners BIGINT NOT NULL)
+ * Table: artist_stats (artist_id PK, monthly_listeners BIGINT, total_plays BIGINT)
  */
 export interface ArtistStatEntity {
   artistId: string;
   monthlyListeners: number;
+  totalPlays: number;
 }
 
 function mapRowToArtistStat(row: any): ArtistStatEntity {
   return {
     artistId: row.artist_id,
     monthlyListeners: Number(row.monthlyListeners ?? 0),
+    totalPlays: Number(row.totalPlays ?? 0),
   };
 }
 
@@ -123,7 +125,7 @@ export async function getArtistStats(
   artistId: string
 ): Promise<ArtistStatEntity | null> {
   const sql = `
-    SELECT artist_id, monthly_listeners AS monthlyListeners
+    SELECT artist_id, monthly_listeners AS monthlyListeners, total_plays AS totalPlays
     FROM artist_stats
     WHERE artist_id = ?
     LIMIT 1

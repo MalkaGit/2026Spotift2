@@ -1,5 +1,5 @@
 import { requireAuthenticated } from "@mycompanyname/lib-common";
-import * as tracksRepo from "./tracks.repository";
+import * as tracksRepo from "./tracks.repository.js";
 import { tracksService } from "../../../../catalog/tracks";
 
 /**
