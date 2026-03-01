@@ -4,17 +4,21 @@ import type { Track } from "./types/track.model";
 import { TrackErrorCode } from "./tracks.error.codes";
 
 /**
- * Returns the track by id. Throws NotFoundError if track or album is not found or soft-deleted.
+ * Returns the track (with nested album) by id. Throws NotFoundError if track or album is not found or soft-deleted.
+ *
+ * Boundary: today album and track are in catalog (same DB), so a single query with join is used.
+ * If track and album move to different services, the implementation can switch to calling the
+ * album service without changing this method's contract.
  */
 export async function getTrackById(trackId: string): Promise<Track> {
-  const track = await trackRepo.getTrackById(trackId);
-  if (track === null) {
+  const result = await trackRepo.getTrackById(trackId);
+  if (result === null) {
     throw new NotFoundError(
       TrackErrorCode.TRACK_NOT_FOUND,
       "Track not found"
     );
   }
-  return track;
+  return result;
 }
 
 /**
@@ -26,9 +30,8 @@ export async function getArtistIdsForTrack(trackId: string): Promise<string[]> {
 }
 
 /**
- * Returns artist ids for the given track ids  for the given track ids. 
- * Empty input → empty Map.
- * Used by analytics worker to expand play events via track_artists.
+ * Returns artist ids per track id for the given track ids. Empty input → empty Map.
+ * Used by analytics (e.g. worker or v1 API) to expand play events via track_artists.
  */
 export async function getArtistIdsByTrackIds(
   trackIds: string[]
