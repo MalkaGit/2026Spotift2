@@ -1,10 +1,10 @@
-import type { WorkerConfig } from "./worker.types";
+import type { WorkerConfig } from "./worker.types.js";
 
 const DEFAULT_INTERVAL_MS = 60_000;
 const DEFAULT_FIRST_RUN_DELAY_MS = 10_000;
 
 /**
- * Worker configuration from environment or defaults.
+ * v2 worker config: intervalMs, firstRunDelayMs (no batchSize; full rebuild only).
  */
 export function getWorkerConfig(): WorkerConfig {
   const intervalMs = process.env.PROJECTION_REBUILD_INTERVAL_MS
