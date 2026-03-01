@@ -3,7 +3,8 @@ import * as tracksRepo from "./tracks.repository";
 import { tracksService } from "../../../../catalog/tracks";
 
 /**
- * Record a play event for a track. Writes one row to track_events (one row per play).
+* Record a play event for a track. Validates track exists, then appends one row to track_events
+ * with event_type = 'play', user_id, track_id (same as v3). Worker expands via track_artists.
  *
  * We normally enrich events at ingest (e.g. add artist_id to the event table or message), since that
  * avoids extra lookups in the worker (or queue consumer). When enrichment would create multiple rows
