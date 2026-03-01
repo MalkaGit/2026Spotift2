@@ -7,7 +7,7 @@ const router = Router();
 
 /**
  * POST /analytics/v2/tracks/:trackId/play
- * Records a play event for the track (body ignored).
+ * Record a play event for the given track. Request body ignored.
  * Returns 204 No Content; 400 invalid UUID; 404 track not found.
  */
 router.post(

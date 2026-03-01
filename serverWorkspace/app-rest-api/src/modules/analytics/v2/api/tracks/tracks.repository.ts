@@ -1,8 +1,10 @@
-//Write to events table
+/**
+ * v2 tracks API repository: write play events to track_events (same table as v3).
+ */
 import { mysqlPool, logger } from "@mycompanyname/lib-common";
 
 /**
- * Insert one 'play' event row into track_events (one row per play). occurred_at defaults to CURRENT_TIMESTAMP.
+ * Append one row to track_events with event_type = 'play', user_id, track_id. occurred_at defaults to CURRENT_TIMESTAMP.
  */
 export async function createTrackPlayEvent(
   userId: string,
