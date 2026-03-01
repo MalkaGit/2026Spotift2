@@ -481,6 +481,40 @@
       "response": []
     },
     {
+      "name": "uc00011-play-track-v1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxYzkxYjVlZi1mMmY1LTQ3NGMtYTc4MC02NzVlMTg1NjljMWUiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE5MjY5NzQsImV4cCI6MTc3MTkzMDU3NCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.lWeMuZbCPU8O-H5NsGhM-kGyuDZ_t4LwuW-y2eu6Jt4",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/analytics/v1/tracks/32000000-0000-4000-8000-000000000001/play",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "analytics",
+            "v1",
+            "tracks",
+            "32000000-0000-4000-8000-000000000001",
+            "play"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "uc00011-play-track-v2",
       "request": {
         "method": "POST",
