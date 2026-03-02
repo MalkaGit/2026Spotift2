@@ -1,6 +1,6 @@
 import { NotFoundError } from "@mycompanyname/lib-common";
 import * as trackRepo from "./tracks.repository";
-import type { Track } from "./types/track.model";
+import { Track, TrackDetails } from "./types";
 import { TrackErrorCode } from "./tracks.error.codes";
 
 /**
@@ -10,7 +10,7 @@ import { TrackErrorCode } from "./tracks.error.codes";
  * If track and album move to different services, the implementation can switch to calling the
  * album service without changing this method's contract.
  */
-export async function getTrackById(trackId: string): Promise<Track> {
+export async function getTrackById(trackId: string): Promise<TrackDetails> {
   const result = await trackRepo.getTrackById(trackId);
   if (result === null) {
     throw new NotFoundError(
@@ -19,6 +19,17 @@ export async function getTrackById(trackId: string): Promise<Track> {
     );
   }
   return result;
+}
+
+
+/**
+ * Get tracks by ids (tracks table only, no join). Returns only existing non-deleted tracks.
+ * Used by artist overview v3; caller composes with getAlbumsByIds for album data.
+ */
+export async function getTracksByIds(
+  trackIds: string[]
+): Promise<Map<string, Track>> {
+  return trackRepo.getTracksByIds(trackIds);
 }
 
 /**

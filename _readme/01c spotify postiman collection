@@ -416,7 +416,7 @@
       "response": []
     },
     {
-      "name": "uc00010-get-artist-overview-v1-join",
+      "name": "uc00010-get-artist-overview-v1-monolith-join",
       "request": {
         "method": "GET",
         "header": [
@@ -448,7 +448,7 @@
       "response": []
     },
     {
-      "name": "uc00010-get-artist-overview-v2-join",
+      "name": "uc00010-get-artist-overview-v2-monolith-de-normalized-projection",
       "request": {
         "method": "GET",
         "header": [
@@ -475,6 +475,39 @@
             "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
             "overview",
             "v2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v3-ms-ready-get-by-ids",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYjY4OGFmYi02MWZlLTRlNzQtOGYyZS1lNjgxOTJmZDc1MmQiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI0MDA3OTUsImV4cCI6MTc3MjQwNDM5NSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.PWITXnpTp9dLXymDDLSxBen55GIPjd1mJgzi0n2FNbc",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview",
+            "v3"
           ]
         }
       },
@@ -543,6 +576,72 @@
             "tracks",
             "32000000-0000-4000-8000-000000000001",
             "play"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v3-ms-ready-get-by-ids",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview",
+            "v2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00010-get-artist-overview-v2-monolith-de-normalized-projection",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "artists",
+            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
+            "overview",
+            "v2"
           ]
         }
       },

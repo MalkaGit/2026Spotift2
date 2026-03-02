@@ -83,4 +83,27 @@ export async function getArtistOverviewV2(
   }
 }
 
+/**
+ * GET /artists/:id/overview/v3
+ * Returns artist overview (v3) MS-ready: stats from analytics, tracks/albums by ids from catalog, composed in service.
+ * Same response shape as GET /artists/:id/overview.
+ */
+export async function getArtistOverviewV3(
+  req: TypedRequest<any, { id: string }, ArtistOverviewQueryInput>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId: string = requestContext.getUserId()!;
+    const artistId: string = req.params.id;
+    const query: ArtistOverviewQueryInput = req.validatedQuery!;
+
+    const overview: ArtistOverviewOutput =
+      await artistsService.getArtistOverviewV3(userId, artistId, query);
+
+    res.status(200).json(overview);
+  } catch (err) {
+    next(err);
+  }
+}
 

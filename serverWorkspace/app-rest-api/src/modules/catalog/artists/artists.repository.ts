@@ -3,51 +3,37 @@ import { logger } from "@mycompanyname/lib-common";
 import { MySqlConnection } from "@mycompanyname/lib-common";
 import * as likesRepo from "../../likes/likes.repository";
 import { LIKED_ENTITY_ARTIST } from "../../likes/types";
+import type { Artist } from "./types";
 import { ArtistOverviewTrackItem } from "./types/artist.overview.output.model";
 
-/**
- * Artist entity matching the artists table schema.
- * Table: artists (id, user_id, name, bio, image_url, header_image_url, action_bar_image_url, created_at)
- * FK: user_id → users(id) ON DELETE CASCADE
- */
-export interface ArtistEntity {
-  id: string;
-  userId: string;
-  name: string;
-  bio: string | null;
-  imageUrl: string | null;
-  headerImageUrl: string | null;
-  actionBarImageUrl: string | null;
-  createdAt: string;
-}
-
-function mapRowToArtistEntity(row: any): ArtistEntity {
+function mapRowToArtist(row: Record<string, unknown>): Artist {
+  const createdAt = row.created_at;
   return {
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    bio: row.bio ?? null,
-    imageUrl: row.image_url ?? null,
-    headerImageUrl: row.header_image_url ?? null,
-    actionBarImageUrl: row.action_bar_image_url ?? null,
+    id: String(row.id ?? ""),
+    userId: String(row.user_id ?? ""),
+    name: String(row.name ?? ""),
+    bio: row.bio != null ? String(row.bio) : null,
+    imageUrl: row.image_url != null ? String(row.image_url) : null,
+    headerImageUrl: row.header_image_url != null ? String(row.header_image_url) : null,
+    actionBarImageUrl: row.action_bar_image_url != null ? String(row.action_bar_image_url) : null,
     createdAt:
-      row.created_at instanceof Date
-        ? row.created_at.toISOString()
-        : new Date(row.created_at).toISOString(),
+      createdAt instanceof Date
+        ? createdAt.toISOString()
+        : new Date(String(createdAt)).toISOString(),
   };
 }
 
 /**
  * Find an artist by id. Returns null if not found.
  */
-export async function findById(artistId: string): Promise<ArtistEntity | null> {
+export async function findById(artistId: string): Promise<Artist | null> {
   const sql = `SELECT id, user_id, name, bio, image_url, header_image_url, action_bar_image_url, created_at FROM artists WHERE id = ? LIMIT 1`;
   const params = [artistId];
   logger.debug("artists.findById - SQL query", { sql, params });
   const [rows] = await mysqlPool.query(sql, params);
-  const result = rows as any[];
+  const result = rows as Record<string, unknown>[];
   if (result.length === 0) return null;
-  return mapRowToArtistEntity(result[0]);
+  return mapRowToArtist(result[0]);
 }
 
 

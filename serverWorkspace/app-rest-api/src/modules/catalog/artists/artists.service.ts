@@ -1,11 +1,14 @@
+import { tracksService } from "../tracks";
+import { albumsService } from "../albums";
 import * as artistsRepo from "./artists.repository";
 import { requireAuthenticated, requireRole } from "@mycompanyname/lib-common";
 import { ForbiddenError, NotFoundError } from "@mycompanyname/lib-common";
-import { ArtistEntity, ArtistStatEntity } from "./artists.repository";
+import type { Artist } from "./types";
 import { ArtistOverviewQueryInput, ArtistOverviewOutput } from "./types";
 import { ArtistsErrorCode } from "./artists.error.codes";
 import * as likesService from "../../likes";
 import { LIKED_ENTITY_ARTIST } from "../../likes/types";
+import { artistsService } from "../../analytics/v3/api/artists";
 
 
 /**
@@ -23,7 +26,7 @@ export async function deleteArtist(
 ): Promise<boolean> {
   requireAuthenticated();
 
-  const artist: ArtistEntity | null = await artistsRepo.findById(artistId);
+  const artist: Artist | null = await artistsRepo.findById(artistId);
 
   // BL: Artist not found
   if (!artist) {
@@ -68,7 +71,7 @@ export async function getArtistOverview(
   requireRole(["listener"]);
 
   // BL: Find artist by ID
-  const artist : ArtistEntity | null = await artistsRepo.findById(artistId);
+  const artist: Artist | null = await artistsRepo.findById(artistId);
   if (!artist) {
     throw new NotFoundError(
       ArtistsErrorCode.ARTIST_NOT_FOUND,
@@ -109,7 +112,7 @@ export async function getArtistOverviewV2(
 ): Promise<ArtistOverviewOutput> {
   requireRole(["listener"]);
 
-  const artist: ArtistEntity | null = await artistsRepo.findById(artistId);
+  const artist: Artist | null = await artistsRepo.findById(artistId);
   if (!artist) {
     throw new NotFoundError(
       ArtistsErrorCode.ARTIST_NOT_FOUND,
@@ -135,6 +138,73 @@ export async function getArtistOverviewV2(
   };
 }
 
+/**
+ * Get artist overview (v3) – MS-ready: no join, no denorm. Get IDs from stat tables,
+ * call catalog for tracks and albums by ids, compose in service.
+ */
+export async function getArtistOverviewV3(
+  userId: string,
+  artistId: string,
+  query: ArtistOverviewQueryInput
+): Promise<ArtistOverviewOutput> {
+  requireRole(["listener"]);
+
+  const artist: Artist | null = await artistsRepo.findById(artistId);
+  if (!artist) {
+    throw new NotFoundError(
+      ArtistsErrorCode.ARTIST_NOT_FOUND,
+      `Artist with id ${artistId} not found`
+    );
+  }
+
+  // BL: Get artist stats and top track stats (MS-ready: analytics calls artists service, no join)
+  const [artistStats, topTrackStats] = await Promise.all([
+    artistsService.getArtistStats(artistId),
+    artistsService.getTopTrackStatsByArtistId(artistId, query.topTracksLimit),
+  ]);
+
+  // BL: Get tracks by ids (MS-ready: catalog calls tracks service, no join)
+  const trackIds = topTrackStats.map((s) => s.trackId);
+  const tracksMap = await tracksService.getTracksByIds(trackIds);
+
+  //BL: Get albums by ids (MS-ready: catalog calls albums service, no join)
+  const albumIds = [...new Set([...tracksMap.values()].map((t) => t.albumId))];
+  const albumsMap = await albumsService.getAlbumsByIds(albumIds);
+
+  // BL: Create top tracks with album details
+  const isLiked = await likesService.likeExists(userId, LIKED_ENTITY_ARTIST, artistId);
+
+  const topTracks = [];
+  let rank = 0;
+  for (const stat of topTrackStats) {
+    const track = tracksMap.get(stat.trackId);
+    const album = track ? albumsMap.get(track.albumId) : null;
+    if (track && album) {
+      rank += 1;
+      topTracks.push({
+        rank,
+        trackId: track.id,
+        trackName: track.name,
+        totalPlays: stat.totalPlays,
+        durationMs: track.durationMs,
+        albumId: track.albumId,
+        albumImageUrl: album.imageUrl ?? "",
+      });
+    }
+  }
+
+  return {
+    artistId: artist.id,
+    artistName: artist.name,
+    headerImageUrl: artist.headerImageUrl,
+    actionBarImageUrl: artist.actionBarImageUrl,
+    isLiked,
+    monthlyListeners: artistStats?.monthlyListeners ?? 0,
+    totalPlays: artistStats?.totalPlays ?? 0,
+    topTracks,
+  };
+}
+
 
 
 
@@ -154,7 +224,7 @@ export async function deleteArtist(
 ): Promise<boolean> {
   requireAuthenticated();
 
-  const artist: ArtistEntity | null = await artistsRepo.findById(artistId);
+  const artist: Artist | null = await artistsRepo.findById(artistId);
 
   // Artist not found
   if (!artist) {
