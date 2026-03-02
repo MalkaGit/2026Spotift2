@@ -5,7 +5,7 @@
  */
 import { mysqlPool, logger, type MySqlConnection } from "@mycompanyname/lib-common";
 import type { Album } from "../../../../catalog/albums";
-import type { Track } from "../../../../catalog/tracks/types/track.model";
+import type { TrackDetails } from "../../../../catalog/tracks/types/track.details.model";
 
 /**
  * In one transaction:
@@ -18,7 +18,7 @@ import type { Track } from "../../../../catalog/tracks/types/track.model";
 export async function applyTrackPlay(
   trackId: string,
   artistIds: string[],
-  track: Track,
+  track: TrackDetails,
   album: Album
 ): Promise<void> {
   let connection: MySqlConnection | undefined;

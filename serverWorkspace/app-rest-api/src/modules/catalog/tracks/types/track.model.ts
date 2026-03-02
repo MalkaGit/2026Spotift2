@@ -1,12 +1,10 @@
-import type { Album } from "../../albums";
-
 /**
- * Track model returned by getTrackById.
- * Track is considered present only when not soft-deleted and its album is not soft-deleted.
+ * Track (minimal). Tracks table only, no join. Returned by getTracksByIds.
+ * Caller composes with getAlbumsByIds when album details are needed.
  */
 export interface Track {
   id: string;
   name: string;
   durationMs: number;
-  album: Album;
+  albumId: string;
 }

@@ -1,3 +1,4 @@
+export type { Artist } from "./artist.model";
 export { artistParamsSchema } from "./artists.params.schema";
 export { ArtistOverviewQueryInput, } from "./artist.overview.query.input.model";
 export { ArtistOverviewQueryInputSchema } from "./artist.overview.query.input.schema";

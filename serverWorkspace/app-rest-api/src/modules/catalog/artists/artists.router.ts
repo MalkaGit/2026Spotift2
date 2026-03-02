@@ -46,6 +46,20 @@ artistsRouter.get(
 );
 
 /**
+ * GET /artists/:id/overview/v3
+ * Returns artist overview (v3) MS-ready: stats from analytics read, tracks/albums by ids from catalog, no join.
+ * Register before /:id/overview so "overview/v3" is not captured as :id.
+ */
+artistsRouter.get(
+  "/:id/overview/v3",
+  createRequestValidator({
+    params: artistParamsSchema,
+    query: ArtistOverviewQueryInputSchema,
+  }),
+  artistsController.getArtistOverviewV3
+);
+
+/**
  * GET /artists/:id/overview
  * Returns artist overview , v1 - reading artist top tracks from normalized table via join.
  *

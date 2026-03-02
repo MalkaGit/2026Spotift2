@@ -1,10 +1,24 @@
-import { mysqlPool } from "@mycompanyname/lib-common";
-import type { Track } from "./types/track.model";
+import { mysqlPool, logger } from "@mycompanyname/lib-common";
+import type { Track, TrackDetails } from "./types";
+
+/** Map raw query row to TrackDetails (explicit coercion for runtime safety). */
+function mapRowToTrackDetails(row: Record<string, unknown>): TrackDetails {
+  return {
+    id: String(row.id ?? ""),
+    name: String(row.name ?? ""),
+    durationMs: Number(row.durationMs ?? 0),
+    album: {
+      id: String(row.albumId ?? ""),
+      name: String(row.albumName ?? ""),
+      imageUrl: row.albumImageUrl != null ? String(row.albumImageUrl) : null,
+    },
+  };
+}
 
 /**
  * Get track and its album by id (single join). Returns null if track or album is not found or soft-deleted.
  */
-export async function getTrackById(trackId: string): Promise<Track | null> {
+export async function getTrackById(trackId: string): Promise<TrackDetails | null> {
   const sql = `
     SELECT t.id, t.name, t.duration_ms AS durationMs, t.album_id AS albumId,
            a.name AS albumName, a.image_url AS albumImageUrl
@@ -14,26 +28,9 @@ export async function getTrackById(trackId: string): Promise<Track | null> {
     LIMIT 1
   `;
   const [rows] = await mysqlPool.query(sql, [trackId]);
-  const result = rows as {
-    id: string;
-    name: string;
-    durationMs: number;
-    albumId: string;
-    albumName: string;
-    albumImageUrl: string | null;
-  }[];
-  if (result.length === 0) return null;
-  const row = result[0];
-  return {
-    id: row.id,
-    name: row.name,
-    durationMs: Number(row.durationMs ?? 0),
-    album: {
-      id: row.albumId,
-      name: row.albumName,
-      imageUrl: row.albumImageUrl ?? null,
-    },
-  };
+  const list = rows as Record<string, unknown>[];
+  if (list.length === 0) return null;
+  return mapRowToTrackDetails(list[0]);
 }
 
 /**
@@ -76,3 +73,41 @@ export async function getArtistIdsByTrackIds(
   }
   return map;
 }
+
+/**
+ * Get tracks by ids from tracks table only. No join to albums.
+ * Returns only non-deleted tracks. Empty input → empty Map.
+ */
+export async function getTracksByIds(
+  trackIds: string[]
+): Promise<Map<string, Track>> {
+  if (trackIds.length === 0) return new Map();
+  const unique = [...new Set(trackIds)];
+  const placeholders = unique.map(() => "?").join(", ");
+  const sql = `
+    SELECT id, name, duration_ms AS durationMs, album_id AS albumId
+    FROM tracks
+    WHERE id IN (${placeholders}) AND deleted_at IS NULL
+  `;
+  const params = unique;
+  logger.debug("tracks.getTracksByIds - SQL query", { sql, params });
+  const [rows] = await mysqlPool.query(sql, params);
+  const list = (rows as Record<string, unknown>[]).map(mapRowToTrack);
+  const map = new Map<string, Track>();
+  for (const track of list) {
+    map.set(track.id, track);
+  }
+  return map;
+}
+
+/** Map raw query row to Track (explicit coercion for runtime safety). */
+function mapRowToTrack(row: Record<string, unknown>): Track {
+  return {
+    id: String(row.id ?? ""),
+    name: String(row.name ?? ""),
+    durationMs: Number(row.durationMs ?? 0),
+    albumId: String(row.albumId ?? ""),
+  };
+}
+
+
