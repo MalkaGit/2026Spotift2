@@ -45,6 +45,7 @@ import { tracksAnalyticsRouter as tracksAnalyticsV2Router } from "./modules/anal
 import { tracksAnalyticsRouter as tracksAnalyticsV3Router } from "./modules/analytics/v3/api/tracks";
 import { searchRouter as searchV1Router } from "./modules/search/v1";
 import { searchRouter as searchV2Router } from "./modules/search/v2";
+import { releaseFeedsRouter as releaseFeedsV1Router } from "./modules/feeds/v1/releases";
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.use("/users", usersRouter);
 app.use("/search/v1", searchV1Router);
 app.use("/search/v2", searchV2Router);
 app.use("/artists", artistsRouter);
+app.use("/me/feeds/v1/releases", releaseFeedsV1Router); //v1- writes updates to domain model (album.released_at and album.id), read aggergated data on read
 app.use("/analytics/v1/tracks", tracksAnalyticsV1Router);
 app.use("/analytics/v2/tracks", tracksAnalyticsV2Router);
 app.use("/analytics/v3/tracks", tracksAnalyticsV3Router);

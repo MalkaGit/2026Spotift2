@@ -126,18 +126,13 @@ DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
   id CHAR(36) NOT NULL PRIMARY KEY,
-  artist_id CHAR(36) NOT NULL,      -- FK → artists.id
   name VARCHAR(255) NOT NULL,
   image_url VARCHAR(512),           -- URL to album cover image
+  album_type ENUM('album', 'single', 'compilation') NOT NULL, -- album category
+  released_at DATE NOT NULL,        -- album release date (required)
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP NULL DEFAULT NULL,
-  CONSTRAINT fk_album_artist FOREIGN KEY (artist_id)
-    REFERENCES artists(id) ON DELETE CASCADE
+  deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB;
-
--- Fetch all albums of an artist and support search/sort
-CREATE INDEX idx_album_artist ON albums(artist_id);
-CREATE INDEX idx_album_artist_name ON albums(artist_id, name);
 
 --  ========================================
 --  playlists TABLE
@@ -189,6 +184,25 @@ CREATE TABLE track_artists (
 ) ENGINE=InnoDB;
 
 CREATE INDEX idx_track_artists_artist ON track_artists(artist_id);
+
+--  ========================================
+--  album_artists TABLE (many-to-many: album can have several artists)
+--  Mirrors track_artists pattern so analytics can treat albums similarly.
+--  ========================================
+DROP TABLE IF EXISTS album_artists;
+
+CREATE TABLE album_artists (
+  album_id CHAR(36) NOT NULL,
+  artist_id CHAR(36) NOT NULL,
+  role VARCHAR(32) NOT NULL,         -- 'primary' or 'featured'
+  PRIMARY KEY (album_id, artist_id),
+  CONSTRAINT fk_album_artists_album FOREIGN KEY (album_id)
+    REFERENCES albums(id) ON DELETE CASCADE,
+  CONSTRAINT fk_album_artists_artist FOREIGN KEY (artist_id)
+    REFERENCES artists(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_album_artists_artist ON album_artists(artist_id);
 
 --  ========================================
 --  artist_stats TABLE (per-artist aggregate stats)
@@ -305,20 +319,35 @@ CREATE TABLE track_events_checkpoint (
 --  ========================================
 
 --  Seed albums (artist has albums). Album cover images reuse existing artist images.
-INSERT INTO albums (id, artist_id, name, image_url)
+INSERT INTO albums (id, name, image_url, album_type, released_at)
 VALUES
   -- Taylor Swift
-  ('10000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', '1989 (Taylor''s Version)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s'),
-  ('10000000-0000-4000-8000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Midnights', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80'),
+  ('10000000-0000-4000-8000-000000000001', '1989 (Taylor''s Version)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s', 'album', CURDATE() - INTERVAL 58 DAY),
+  ('10000000-0000-4000-8000-000000000002', 'Midnights', 'https://img.freepik.com/premium-photo/watercolor-illustration-depicting-artist-working-their-craft-surrounded-by-vibrant-spl_924727-134276.jpg?semt=ais_user_personalization&w=740&q=80', 'single', CURDATE() - INTERVAL 59 DAY),
+  ('10000000-0000-4000-8000-000000000003', 'Taylor''s Mix (Compilation)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUb00DH3n0v2jSivtTamHdYqx43xyR51-Hcg&s', 'compilation', CURDATE() - INTERVAL 60 DAY),
 
   -- Drake
-  ('20000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Scorpion', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s'),
+  ('20000000-0000-4000-8000-000000000001', 'Scorpion', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx4srWGPMQrPiSrqEI4oI3QKXoveB-f4UI5Q&s', 'album', CURDATE() - INTERVAL 60 DAY),
 
   -- Ed Sheeran
-  ('30000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', '÷ (Divide)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s'),
+  ('30000000-0000-4000-8000-000000000001', '÷ (Divide)', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkV1bPiUDbSj6QV7w_tFyJrgGy77smiXnybB5nXZCOltmYBAzY_a_BmDY&s', 'album', CURDATE() - INTERVAL 61 DAY),
 
   -- Beyoncé
-  ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'Lemonade', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s');
+  ('40000000-0000-4000-8000-000000000001', 'Lemonade', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9gXAHZYhIQ-0iGnHRL38rcwCCAsER6KfzQg&s', 'album', CURDATE() - INTERVAL 62 DAY);
+
+--  Seed album_artists (every album has ≥1 artist; one album could be extended with featured artists)
+INSERT INTO album_artists (album_id, artist_id, role)
+VALUES
+  -- Taylor Swift albums
+  ('10000000-0000-4000-8000-000000000001', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  ('10000000-0000-4000-8000-000000000002', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  ('10000000-0000-4000-8000-000000000003', '111a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Drake
+  ('20000000-0000-4000-8000-000000000001', '222a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Ed Sheeran
+  ('30000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
+  -- Beyoncé
+  ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary');
 
 --  Seed tracks (id, name, duration_ms, album_id)
 INSERT INTO tracks (id, name, duration_ms, album_id)
