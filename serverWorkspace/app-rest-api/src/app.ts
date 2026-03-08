@@ -39,6 +39,7 @@ import { jwtAuthMiddleware } from "@mycompanyname/lib-common";
 import { requestLoggerMiddleware } from "@mycompanyname/lib-common";
 import { errorMiddleware } from "@mycompanyname/lib-common";
 import { usersRouter } from "./modules/users";
+import { albumsRouter } from "./modules/catalog/albums";
 import { artistsRouter } from "./modules/catalog/artists";
 import { tracksAnalyticsRouter as tracksAnalyticsV1Router } from "./modules/analytics/v1/api/tracks";
 import { tracksAnalyticsRouter as tracksAnalyticsV2Router } from "./modules/analytics/v2/api/tracks";
@@ -87,9 +88,10 @@ app.get("/health", (_req, res) => {
 
 // API Routes
 app.use("/users", usersRouter);
+app.use("/artists", artistsRouter);
+app.use("/albums", albumsRouter);
 app.use("/search/v1", searchV1Router);
 app.use("/search/v2", searchV2Router);
-app.use("/artists", artistsRouter);
 app.use("/me/feeds/v1/releases", releaseFeedsV1Router); //v1- writes updates to domain model (album.released_at and album.id), read aggergated data on read
 app.use("/analytics/v1/tracks", tracksAnalyticsV1Router);
 app.use("/analytics/v2/tracks", tracksAnalyticsV2Router);

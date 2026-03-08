@@ -35,3 +35,21 @@ export async function getAlbumsByIds(
   }
   return map;
 }
+
+/**
+ * Mark an album as released by setting released_at = NOW().
+ * Repository does not throw—returns boolean only.
+ * @returns true if a row was updated, false if album not found or deleted
+ */
+export async function releaseAlbumById(albumId: string): Promise<boolean> {
+  const sql = `
+    UPDATE albums
+    SET released_at = NOW()
+    WHERE id = ? AND deleted_at IS NULL
+  `;
+  const params = [albumId];
+  logger.debug("albums.releaseAlbumById - SQL query", { sql, params });
+  const [result] = await mysqlPool.query(sql, params);
+  const affectedRows = (result as { affectedRows?: number })?.affectedRows ?? 0;
+  return affectedRows > 0;
+}

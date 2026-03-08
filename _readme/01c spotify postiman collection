@@ -769,6 +769,39 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "uc00012-post-apbums-release - V1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5ODE3MjAsImV4cCI6MTc3Mjk4NTMyMCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.tULvgmBwbYuhuyTwqSHkQK-K7lRdAanazqa_9qa0O7o",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "albums",
+            "10000000-0000-4000-8000-000000000001",
+            "release",
+            "v1"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
