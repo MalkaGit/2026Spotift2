@@ -1,6 +1,6 @@
 import { requireAuthenticated } from "@mycompanyname/lib-common";
 import * as tracksRepo from "./tracks.repository.js";
-import { tracksService } from "../../../../catalog/tracks";
+import { tracksService } from "../../../../catalog/albums/tracks/index.js";
 
 /**
  * Record a play event for a track. Writes one row to track_events (one row per play).

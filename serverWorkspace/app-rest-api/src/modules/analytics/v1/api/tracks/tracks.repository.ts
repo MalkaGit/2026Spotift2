@@ -5,7 +5,7 @@
  */
 import { mysqlPool, logger, type MySqlConnection } from "@mycompanyname/lib-common";
 import type { Album } from "../../../../catalog/albums";
-import type { TrackDetails } from "../../../../catalog/tracks/types/track.details.model";
+import type { TrackDetails } from "../../../../catalog/albums/tracks/types/track.details.model";
 
 /**
  * In one transaction:

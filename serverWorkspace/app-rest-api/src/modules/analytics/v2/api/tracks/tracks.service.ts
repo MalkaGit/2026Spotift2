@@ -1,6 +1,6 @@
 import { requireAuthenticated } from "@mycompanyname/lib-common";
 import * as tracksRepo from "./tracks.repository";
-import { tracksService } from "../../../../catalog/tracks";
+import { tracksService } from "../../../../catalog/albums/tracks";
 
 /**
 * Record a play event for a track. Validates track exists, then appends one row to track_events

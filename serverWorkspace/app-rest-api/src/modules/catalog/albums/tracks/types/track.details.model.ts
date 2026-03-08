@@ -1,4 +1,4 @@
-import type { Album } from "../../albums";
+import type { Album } from "../..";
 
 /**
  * Track model returned by getTrackById.

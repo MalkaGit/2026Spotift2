@@ -48,7 +48,7 @@ import { getWorkerConfig } from "./common/worker.config.js";
 import type { WorkerConfig } from "./common/worker.types.js";
 import * as trackEventsRepo from "./track-events.repository.js";
 import type { TrackEventRow } from "./track-events.repository.js";
-import { tracksService } from "../../../catalog/tracks";
+import { tracksService } from "../../../catalog/albums/tracks/index.js";
 
 const WORKER_ID = "tracks-events-worker-v3";
 let tickCount_modulo10 = 0;

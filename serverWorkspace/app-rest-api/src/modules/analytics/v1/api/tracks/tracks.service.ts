@@ -3,7 +3,7 @@
  * tables in one transaction. No event table or worker; see _plans/uc00011-backend-play-track-operation-v1.plan.md.
  */
 import { requireAuthenticated } from "@mycompanyname/lib-common";
-import { tracksService } from "../../../../catalog/tracks";
+import { tracksService } from "../../../../catalog/albums/tracks";
 import * as tracksRepo from "./tracks.repository.js";
 
 /**
