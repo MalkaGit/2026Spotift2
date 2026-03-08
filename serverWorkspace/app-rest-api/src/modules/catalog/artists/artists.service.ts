@@ -1,4 +1,4 @@
-import { tracksService } from "../tracks";
+import { tracksService } from "../albums/tracks";
 import { albumsService } from "../albums";
 import * as artistsRepo from "./artists.repository";
 import { requireAuthenticated, requireRole } from "@mycompanyname/lib-common";

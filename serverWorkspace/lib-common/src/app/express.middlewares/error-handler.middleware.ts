@@ -74,7 +74,7 @@
  *   Example: { field: "email", code: "email" } when email="not-an-email"
  * 
  * - unrecognized_keys: Extra fields not allowed (strict mode)
- *   Example: { field: "root", code: "unrecognized_keys" } when body has extra fields
+ *   Example: { field: "event_typeaa", code: "unrecognized_keys" } when query has unknown param
  * 
  * - custom: Custom validation error from schema.refine()
  *   Example: { field: "root", code: "at_least_one_field_required" } from custom refine message
@@ -134,10 +134,22 @@ function mapZodErrorCodeToDtoErrorCode(issue: ZodIssue): string {
 }
 
 function mapZodErrorToDtoError(error: ZodError): FieldErrorDto[] {
-  return error.issues.map((issue) => ({
-    field: issue.path.length > 0 ? issue.path.join('.') : 'root',
-    code: mapZodErrorCodeToDtoErrorCode(issue),
-  }));
+  const result: FieldErrorDto[] = [];
+  for (const issue of error.issues) {
+    const code = mapZodErrorCodeToDtoErrorCode(issue);
+    if (issue.code === 'unrecognized_keys' && 'keys' in issue) {
+      // Use each unrecognized key as field (helps clients fix typos)
+      const keys = (issue as { keys: string[] }).keys;
+      for (const key of keys) {
+        result.push({ field: key, code });
+      }
+    } else {
+      const field =
+        issue.path.length > 0 ? issue.path.join('.') : 'root';
+      result.push({ field, code });
+    }
+  }
+  return result;
 }
 
 /**

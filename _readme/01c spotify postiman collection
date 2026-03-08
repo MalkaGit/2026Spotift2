@@ -582,13 +582,13 @@
       "response": []
     },
     {
-      "name": "uc00010-get-artist-overview-v3-ms-ready-get-by-ids",
+      "name": "uc00012-get-feed-releases--whats-new-v1_a",
       "request": {
         "method": "GET",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5NjU3ODYsImV4cCI6MTc3Mjk2OTM4NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.XDtIQdrHogDkN0uesEN8TcZ77P8mGN8cw4tlfvVxC38",
             "type": "text"
           },
           {
@@ -598,30 +598,36 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "raw": "http://localhost:3000/me/feeds/v1/releases?event_type=release_album",
           "protocol": "http",
           "host": [
             "localhost"
           ],
           "port": "3000",
           "path": [
-            "artists",
-            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
-            "overview",
-            "v2"
+            "me",
+            "feeds",
+            "v1",
+            "releases"
+          ],
+          "query": [
+            {
+              "key": "event_type",
+              "value": "release_album"
+            }
           ]
         }
       },
       "response": []
     },
     {
-      "name": "uc00010-get-artist-overview-v2-monolith-de-normalized-projection",
+      "name": "uc00012-get-feed-releases--whats-new-v1_a2",
       "request": {
         "method": "GET",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjYyOTBiYS0zOTI5LTQ1NTktOTM4OC01NTI3NzU4ZmI5ZmYiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzE1MDExNTYsImV4cCI6MTc3MTUwNDc1NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9._bTaLhm-MjivraggEJzQqi6NPhqrTt8c52Jyf7bpAAo",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5NjU3ODYsImV4cCI6MTc3Mjk2OTM4NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.XDtIQdrHogDkN0uesEN8TcZ77P8mGN8cw4tlfvVxC38",
             "type": "text"
           },
           {
@@ -631,17 +637,167 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/artists/444a1e45-c1c2-4b56-a331-eba6bd9b9db8/overview/v2",
+          "raw": "http://localhost:3000/me/feeds/v1/releases",
           "protocol": "http",
           "host": [
             "localhost"
           ],
           "port": "3000",
           "path": [
-            "artists",
-            "444a1e45-c1c2-4b56-a331-eba6bd9b9db8",
-            "overview",
-            "v2"
+            "me",
+            "feeds",
+            "v1",
+            "releases"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-get-feed-releases--whats-new-v1_b_bad_request",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5NjU3ODYsImV4cCI6MTc3Mjk2OTM4NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.XDtIQdrHogDkN0uesEN8TcZ77P8mGN8cw4tlfvVxC38",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/me/feeds/v1/releases?event_type=release_album,release_episode",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "me",
+            "feeds",
+            "v1",
+            "releases"
+          ],
+          "query": [
+            {
+              "key": "event_type",
+              "value": "release_album,release_episode"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-get-feed-releases--whats-new-v1_c_bad_request",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5NjU3ODYsImV4cCI6MTc3Mjk2OTM4NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.XDtIQdrHogDkN0uesEN8TcZ77P8mGN8cw4tlfvVxC38",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/me/feeds/v1/releases?event_typeXXX=release_album,release_episode",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "me",
+            "feeds",
+            "v1",
+            "releases"
+          ],
+          "query": [
+            {
+              "key": "event_typeXXX",
+              "value": "release_album,release_episode"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-get-feed-releases--whats-new-v1_d_bad_request",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5NjU3ODYsImV4cCI6MTc3Mjk2OTM4NiwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.XDtIQdrHogDkN0uesEN8TcZ77P8mGN8cw4tlfvVxC38",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/me/feeds/v1/releases?event_type=release_albumxXXX",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "me",
+            "feeds",
+            "v1",
+            "releases"
+          ],
+          "query": [
+            {
+              "key": "event_type",
+              "value": "release_albumxXXX"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-post-apbums-release - V1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5ODE3MjAsImV4cCI6MTc3Mjk4NTMyMCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.tULvgmBwbYuhuyTwqSHkQK-K7lRdAanazqa_9qa0O7o",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "albums",
+            "10000000-0000-4000-8000-000000000001",
+            "release",
+            "v1"
           ]
         }
       },
