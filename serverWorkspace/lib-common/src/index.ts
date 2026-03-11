@@ -22,7 +22,11 @@ export { mysqlPool } from "./infra/db/mySqlDB.mysql2";
 export type { MySqlConnection } from "./infra/db/mySqlDB.mysql2";
 
 // Line below allows: import { testMySqlConnection } from "@server/lib-common";
-export {testMySqlConnection} from "./infra/db/mySqlDB.mysql2";
+export { testMySqlConnection } from "./infra/db/mySqlDB.mysql2";
+
+// Line below allows: import { runInTransaction, DbTransaction } from "@server/lib-common";
+export { runInTransaction } from "./infra/db/mySqlDB.mysql2";
+export type { DbTransaction } from "./infra/db/mySqlDB.mysql2";
 
 // Line below allows: import { BadRequestError, NotFoundError, etc. } from "@server/lib-common";
 // Note: Error codes are now domain-scoped and defined in each domain module, not in lib-common
