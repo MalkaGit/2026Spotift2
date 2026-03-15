@@ -1,5 +1,6 @@
-import { mysqlPool, logger } from "@mycompanyname/lib-common";
-import type { Album } from "./types/album.model";
+import { mysqlPool, logger, type MySqlConnection } from "@mycompanyname/lib-common";
+import type { Album, AlbumType } from "./types/album.model";
+import type { AlbumDetails } from "./types/album.details.model";
 
 /** Map raw query row to Album (explicit coercion for runtime safety). */
 function mapRowToAlbum(row: Record<string, unknown>): Album {
@@ -37,19 +38,105 @@ export async function getAlbumsByIds(
 }
 
 /**
- * Mark an album as released by setting released_at = NOW().
- * Repository does not throw—returns boolean only.
- * @returns true if a row was updated, false if album not found or deleted
+ * Get album details (outside a transaction)
+ * Returns null if album not found or deleted.
  */
-export async function releaseAlbumById(albumId: string): Promise<boolean> {
+export async function getAlbumDetails(albumId: string): Promise<AlbumDetails | null> {
+  const conn = await mysqlPool.getConnection();
+  try {
+    return await getAlbumDetailsTx(conn, albumId);
+  } finally {
+    conn.release();
+  }
+}
+
+/**
+ * Get album details (using given connection to allow reading within transaction).
+ * Returns null if album not found or deleted. 
+*/
+export async function getAlbumDetailsTx(
+  conn: MySqlConnection,
+  albumId: string
+): Promise<AlbumDetails | null> {
   const sql = `
-    UPDATE albums
-    SET released_at = NOW()
-    WHERE id = ? AND deleted_at IS NULL
+    SELECT a.id AS album_id,
+           a.name AS album_name,
+           a.album_type,
+           a.image_url AS album_image_url,
+           a.released_at AS album_released_at,
+           ar.id AS artist_id,
+           ar.name AS artist_name
+    FROM albums a
+    JOIN album_artists aa ON aa.album_id = a.id
+    JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
+    WHERE a.id = ? AND a.deleted_at IS NULL
   `;
   const params = [albumId];
-  logger.debug("albums.releaseAlbumById - SQL query", { sql, params });
-  const [result] = await mysqlPool.query(sql, params);
+  logger.debug("albums.getAlbumDetailsTx - SQL query", { sql: sql.trim(), params });
+  const [rows] = await conn.query(sql, params);
+  const rowList = rows as Record<string, unknown>[];
+  return mapRowsToAlbumDetails(rowList);
+}
+
+
+
+/** Map query rows to AlbumDetails (single implementation for both Tx and non-Tx). */
+function mapRowsToAlbumDetails(rowList: Record<string, unknown>[]): AlbumDetails | null {
+  if (!rowList || rowList.length === 0) return null;
+  const first = rowList[0];
+  const artists: { id: string; name: string }[] = [];
+  const seenArtistIds = new Set<string>();
+  for (const r of rowList) {
+    const artistId = String(r.artist_id ?? "");
+    if (!seenArtistIds.has(artistId)) {
+      seenArtistIds.add(artistId);
+      artists.push({ id: artistId, name: String(r.artist_name ?? "") });
+    }
+  }
+  const releasedAt = first.album_released_at != null ? new Date(first.album_released_at as string | Date) : null;
+  return {
+    id: String(first.album_id ?? ""),
+    name: String(first.album_name ?? ""),
+    albumType: (String(first.album_type ?? "album") as AlbumType),
+    imageUrl: first.album_image_url != null ? String(first.album_image_url) : null,
+    releasedAt,
+    artists,
+  };
+}
+
+
+/**
+ * Mark an album as released (uses pool; for use outside a transaction).
+ * Sets released_at to the given instant. Does not throw—returns boolean only.
+ * @returns true if a row was updated, false if album not found or deleted
+ */
+export async function releaseAlbumById(albumId: string, releasedAt: Date): Promise<boolean> {
+  const conn = await mysqlPool.getConnection();
+  try {
+    return await releaseAlbumByIdTx(conn, albumId, releasedAt);
+  } finally {
+    conn.release();
+  }
+}
+
+/**
+ * Set album released_at to the given time. Runs on the given connection (for use inside a transaction).
+ */
+export async function releaseAlbumByIdTx(
+  conn: MySqlConnection,
+  albumId: string,
+  releasedAt: Date
+): Promise<boolean> {
+  const sql = `
+    UPDATE albums
+    SET released_at = ?
+    WHERE id = ? AND deleted_at IS NULL
+  `;
+  const params = [releasedAt, albumId];
+  logger.debug("albums.releaseAlbumByIdTx - SQL query", { sql, params });
+  const [result] = await conn.query(sql, params);
   const affectedRows = (result as { affectedRows?: number })?.affectedRows ?? 0;
   return affectedRows > 0;
 }
+
+
