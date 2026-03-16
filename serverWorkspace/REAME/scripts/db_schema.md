@@ -129,7 +129,7 @@ CREATE TABLE albums (
   name VARCHAR(255) NOT NULL,
   image_url VARCHAR(512),           -- URL to album cover image
   album_type ENUM('album', 'single', 'compilation') NOT NULL, -- album category
-  released_at DATE NOT NULL,        -- album release date (required)
+  released_at DATE NULL,            -- when the album was released; NULL until release action
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB;
@@ -323,18 +323,18 @@ DROP TABLE IF EXISTS activity_events;
 CREATE TABLE activity_events (
   event_id CHAR(36) NOT NULL PRIMARY KEY,
   event_time TIMESTAMP NOT NULL,
-  verb VARCHAR(32) NOT NULL,
-  object_type VARCHAR(32) NOT NULL,
-  object_id CHAR(36) NOT NULL,
-  object_name VARCHAR(255) NOT NULL,
-  context_object_type VARCHAR(32) NULL,
-  context_object_id CHAR(36) NULL,
-  context_object_name VARCHAR(255) NULL,
-  event_data JSON NULL
+  event_domain VARCHAR(32) NOT NULL,
+  event_type VARCHAR(64) NOT NULL,
+  aggregate_type VARCHAR(32) NOT NULL,
+  aggregate_id CHAR(36) NOT NULL,
+  event_payload_json JSON NOT NULL,
+  schema_version INT NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE INDEX idx_activity_events_event_time ON activity_events (event_time DESC);
-CREATE INDEX idx_activity_events_context ON activity_events (context_object_type, context_object_id);
+CREATE INDEX idx_activity_events_type_time ON activity_events (event_domain, event_type, event_time DESC);
+CREATE INDEX idx_activity_events_aggregate ON activity_events (aggregate_type, aggregate_id, event_time DESC);
 
 --  ========================================
 --  activity_event_actors TABLE (centralized activity log)
@@ -436,15 +436,34 @@ JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
 WHERE fe.verb = 'released';
 
 --  Backfill activity_events and activity_event_actors from recent albums (released in last 60 days)
-INSERT INTO activity_events (event_id, event_time, verb, object_type, object_id, object_name, event_data)
+INSERT INTO activity_events (
+  event_id,
+  event_time,
+  event_domain,
+  event_type,
+  aggregate_type,
+  aggregate_id,
+  event_payload_json,
+  schema_version
+)
 SELECT
-  UUID(),
-  TIMESTAMP(a.released_at),
-  'released',
-  'album',
-  a.id,
-  a.name,
-  JSON_OBJECT('album_type', a.album_type, 'image_url', a.image_url)
+  UUID() AS event_id,
+  TIMESTAMP(a.released_at) AS event_time,
+  'catalog' AS event_domain,
+  'catalog.album_released' AS event_type,
+  'album' AS aggregate_type,
+  a.id AS aggregate_id,
+  JSON_OBJECT(
+    'releasedAt', TIMESTAMP(a.released_at),
+    'album', JSON_OBJECT(
+      'id', a.id,
+      'title', a.name,
+      'imageUrl', a.image_url,
+      'albumType', a.album_type
+    ),
+    'owners', JSON_ARRAY()
+  ) AS event_payload_json,
+  1 AS schema_version
 FROM albums a
 WHERE a.deleted_at IS NULL
   AND a.released_at >= CURDATE() - INTERVAL 60 DAY;
@@ -452,10 +471,13 @@ WHERE a.deleted_at IS NULL
 INSERT INTO activity_event_actors (event_id, actor_type, actor_id, actor_name)
 SELECT ae.event_id, 'artist', ar.id, ar.name
 FROM activity_events ae
-JOIN album_artists aa ON aa.album_id = ae.object_id AND ae.object_type = 'album'
+JOIN album_artists aa
+  ON aa.album_id = ae.aggregate_id
+  AND ae.aggregate_type = 'album'
+  AND ae.event_domain = 'catalog'
+  AND ae.event_type = 'catalog.album_released'
 JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
-WHERE ae.verb = 'released'
-  AND ae.event_time >= CURDATE() - INTERVAL 60 DAY;
+WHERE ae.event_time >= CURDATE() - INTERVAL 60 DAY;
 
 --  Seed tracks (id, name, duration_ms, album_id)
 INSERT INTO tracks (id, name, duration_ms, album_id)
