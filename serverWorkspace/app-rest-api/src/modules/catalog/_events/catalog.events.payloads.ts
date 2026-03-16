@@ -40,3 +40,22 @@ export interface AlbumReleasedEventPayload {
   }[];
 }
 
+/**
+ * Catalog-owned payload for `catalog.episode_released` events.
+ *
+ * - Serialized into `activity_events.event_payload_json`.
+ * - Episode belongs to one show; `show` (id, name) is also written to `activity_event_actors` with actor_type = 'show'.
+ */
+export interface EpisodeReleasedEventPayload {
+  episode: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    durationMs: number;
+  };
+  releasedAt: Date;
+  show: {
+    id: string;
+    name: string;
+  };
+}
