@@ -1,6 +1,7 @@
 import { ConflictError, NotFoundError, mysqlPool } from "@mycompanyname/lib-common";
 import * as albumsRepo from "./albums.repository";
 import * as activityEventsService from "../../activityEvents/activityEvents.service";
+import * as feedsEventsService from "../../feeds/v3/writer/feeds-events.service";
 import type { Album } from "./types/album.model";
 import { AlbumsErrorCode } from "./albums.error.codes";
 import { AlbumReleasedEventPayload } from "../_events/catalog.events.payloads";
@@ -81,6 +82,60 @@ export async function releaseAlbumV2(albumId: string): Promise<void> {
     };
 
     await activityEventsService.insertAlbumReleaseEvent(conn, eventId, payload);
+
+    await conn.commit();
+  } catch (err) {
+    try {
+      await conn.rollback();
+    } catch {
+      // ignore rollback errors, surface original error
+    }
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+/**
+ * Release album V3: set released_at and record the release directly
+ * into the feed projection tables (feed_events + feed_event_actors).
+ *
+ * This mirrors the V2 flow but writes to feeds v3 instead of
+ * activity_events. All writes happen inside a single transaction.
+ */
+export async function releaseAlbumV3(albumId: string): Promise<void> {
+  const conn = await mysqlPool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const details = await albumsRepo.getAlbumDetailsTx(conn, albumId);
+    if (!details) {
+      throw new NotFoundError(AlbumsErrorCode.ALBUM_NOT_FOUND, "Album not found");
+    }
+
+    //if (details.releasedAt != null) {
+    //  throw new ConflictError(AlbumsErrorCode.ALBUM_ALREADY_RELEASED, "Album already released");
+    //}
+
+    const releasedAt = new Date();
+    const updated = await albumsRepo.releaseAlbumByIdTx(conn, albumId, releasedAt);
+    if (!updated) {
+      throw new NotFoundError(AlbumsErrorCode.ALBUM_NOT_FOUND, "Album not found");
+    }
+
+    const eventId = crypto.randomUUID();
+    const payload: AlbumReleasedEventPayload = {
+      releasedAt,
+      album: {
+        id: details.id,
+        title: details.name,
+        imageUrl: details.imageUrl,
+        albumType: details.albumType,
+      },
+      artists: details.artists.map((a) => ({ id: a.id, name: a.name })),
+    };
+
+    await feedsEventsService.insertAlbumReleaseEvent(conn, eventId, payload);
 
     await conn.commit();
   } catch (err) {
