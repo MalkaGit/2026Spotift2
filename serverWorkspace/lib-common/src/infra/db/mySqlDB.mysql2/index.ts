@@ -11,5 +11,8 @@
 export { pool as mysqlPool } from "./db.client";
 export { testConnection as testMySqlConnection} from "./db.client.tester";
 export type { MySqlConnection } from "./db.types";
+export { getMySqlConnection } from "./db.connection";
+export { runInTransaction } from "./db.transactionRunner";
+export type { DbTransaction } from "./db.transactionRunner";
 
 

@@ -3,6 +3,7 @@
  */
 export const AlbumsErrorCode = {
   ALBUM_NOT_FOUND: "ALBUM_NOT_FOUND",
+  ALBUM_ALREADY_RELEASED: "ALBUM_ALREADY_RELEASED",
 } as const;
 
 export type AlbumsErrorCodeType =

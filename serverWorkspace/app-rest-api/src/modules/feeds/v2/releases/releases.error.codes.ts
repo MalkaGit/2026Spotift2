@@ -1,0 +1,3 @@
+export const ReleasesErrorCode = {
+  RELEASE_EPISODE_NOT_IMPLEMENTED: "FEEDS_RELEASE_EPISODE_NOT_IMPLEMENTED",
+} as const;

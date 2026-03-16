@@ -315,6 +315,80 @@ CREATE TABLE track_events_checkpoint (
 ) ENGINE=InnoDB;
 
 --  ========================================
+--  activity_events TABLE (centralized activity log)
+--  ========================================
+DROP TABLE IF EXISTS activity_event_actors;
+DROP TABLE IF EXISTS activity_events;
+
+CREATE TABLE activity_events (
+  event_id CHAR(36) NOT NULL PRIMARY KEY,
+  event_time TIMESTAMP NOT NULL,
+  verb VARCHAR(32) NOT NULL,
+  object_type VARCHAR(32) NOT NULL,
+  object_id CHAR(36) NOT NULL,
+  object_name VARCHAR(255) NOT NULL,
+  context_object_type VARCHAR(32) NULL,
+  context_object_id CHAR(36) NULL,
+  context_object_name VARCHAR(255) NULL,
+  event_data JSON NULL
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_activity_events_event_time ON activity_events (event_time DESC);
+CREATE INDEX idx_activity_events_context ON activity_events (context_object_type, context_object_id);
+
+--  ========================================
+--  activity_event_actors TABLE (centralized activity log)
+--  ========================================
+CREATE TABLE activity_event_actors (
+  event_id CHAR(36) NOT NULL,
+  actor_type VARCHAR(32) NOT NULL,
+  actor_id CHAR(36) NOT NULL,
+  actor_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (event_id, actor_id),
+  CONSTRAINT fk_activity_event_actors_event FOREIGN KEY (event_id)
+    REFERENCES activity_events(event_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_activity_event_actors_actor ON activity_event_actors (actor_type, actor_id, event_id DESC);
+
+--  ========================================
+--  feed_events TABLE (feeds v2 CQRS projection)
+--  ========================================
+DROP TABLE IF EXISTS feed_event_actors;
+DROP TABLE IF EXISTS feed_events;
+
+CREATE TABLE feed_events (
+  event_id CHAR(36) NOT NULL PRIMARY KEY,
+  event_time TIMESTAMP NOT NULL,
+  verb VARCHAR(32) NOT NULL,
+  object_type VARCHAR(32) NOT NULL,
+  object_id CHAR(36) NOT NULL,
+  object_name VARCHAR(255) NOT NULL,
+  context_object_type VARCHAR(32) NULL,
+  context_object_id CHAR(36) NULL,
+  context_object_name VARCHAR(255) NULL,
+  event_data JSON NULL
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_feed_events_event_time ON feed_events (event_time DESC);
+CREATE INDEX idx_feed_events_context ON feed_events (context_object_type, context_object_id);
+
+--  ========================================
+--  feed_event_actors TABLE (feeds v2 CQRS projection)
+--  ========================================
+CREATE TABLE feed_event_actors (
+  event_id CHAR(36) NOT NULL,
+  actor_type VARCHAR(32) NOT NULL,
+  actor_id CHAR(36) NOT NULL,
+  actor_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (event_id, actor_id),
+  CONSTRAINT fk_feed_event_actors_event FOREIGN KEY (event_id)
+    REFERENCES feed_events(event_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_feed_event_actors_actor ON feed_event_actors (actor_type, actor_id, event_id DESC);
+
+--  ========================================
 --  Seed albums, tracks, and stats
 --  ========================================
 
@@ -348,6 +422,40 @@ VALUES
   ('30000000-0000-4000-8000-000000000001', '333a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary'),
   -- Beyoncé
   ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary');
+
+--  Backfill feed_events and feed_event_actors from albums (released_at)
+INSERT INTO feed_events (event_id, event_time, verb, object_type, object_id, object_name, event_data)
+SELECT UUID(), TIMESTAMP(a.released_at), 'released', 'album', a.id, a.name, JSON_OBJECT('album_type', a.album_type, 'image_url', a.image_url)
+FROM albums a WHERE a.deleted_at IS NULL;
+
+INSERT INTO feed_event_actors (event_id, actor_type, actor_id, actor_name)
+SELECT fe.event_id, 'artist', ar.id, ar.name
+FROM feed_events fe
+JOIN album_artists aa ON aa.album_id = fe.object_id AND fe.object_type = 'album'
+JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
+WHERE fe.verb = 'released';
+
+--  Backfill activity_events and activity_event_actors from recent albums (released in last 60 days)
+INSERT INTO activity_events (event_id, event_time, verb, object_type, object_id, object_name, event_data)
+SELECT
+  UUID(),
+  TIMESTAMP(a.released_at),
+  'released',
+  'album',
+  a.id,
+  a.name,
+  JSON_OBJECT('album_type', a.album_type, 'image_url', a.image_url)
+FROM albums a
+WHERE a.deleted_at IS NULL
+  AND a.released_at >= CURDATE() - INTERVAL 60 DAY;
+
+INSERT INTO activity_event_actors (event_id, actor_type, actor_id, actor_name)
+SELECT ae.event_id, 'artist', ar.id, ar.name
+FROM activity_events ae
+JOIN album_artists aa ON aa.album_id = ae.object_id AND ae.object_type = 'album'
+JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
+WHERE ae.verb = 'released'
+  AND ae.event_time >= CURDATE() - INTERVAL 60 DAY;
 
 --  Seed tracks (id, name, duration_ms, album_id)
 INSERT INTO tracks (id, name, duration_ms, album_id)
