@@ -49,6 +49,7 @@ import { searchRouter as searchV2Router } from "./modules/search/v2";
 import { releaseFeedsRouter as releaseFeedsV1Router } from "./modules/feeds/v1/releases";
 import { releaseFeedsRouter as releaseFeedsV2Router } from "./modules/feeds/v2/releases";
 import { releaseFeedsRouter as releaseFeedsV3Router } from "./modules/feeds/v3/releases";
+import { releaseFeedsRouter as releaseFeedsRouterV4a } from "./modules/feeds/v4a/releases";
 
 const app = express();
 
@@ -97,6 +98,7 @@ app.use("/search/v2", searchV2Router);  //v2: read from domain tables (albums + 
 app.use("/me/feeds/v1/releases", releaseFeedsV1Router); // v1: read from domain tables (albums + album_artists)
 app.use("/me/feeds/v2/releases", releaseFeedsV2Router); // v2: read from activity_events + activity_event_actors
 app.use("/me/feeds/v3/releases", releaseFeedsV3Router); // v3: read from feed_events + feed_event_actors
+app.use("/me/feeds/v4a/releases", releaseFeedsRouterV4a); // v4a: read from feed_events + feed_event_actors populated by v4a workers
 app.use("/analytics/v1/tracks", tracksAnalyticsV1Router);
 app.use("/analytics/v2/tracks", tracksAnalyticsV2Router);
 app.use("/analytics/v3/tracks", tracksAnalyticsV3Router);
