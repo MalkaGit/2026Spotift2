@@ -352,7 +352,7 @@ CREATE TABLE activity_event_actors (
 CREATE INDEX idx_activity_event_actors_actor ON activity_event_actors (actor_type, actor_id, event_id DESC);
 
 --  ========================================
---  feed_events TABLE (feeds v2 CQRS projection)
+--  feed_events TABLE (feeds CQRS projection)
 --  ========================================
 DROP TABLE IF EXISTS feed_event_actors;
 DROP TABLE IF EXISTS feed_events;
@@ -360,18 +360,17 @@ DROP TABLE IF EXISTS feed_events;
 CREATE TABLE feed_events (
   event_id CHAR(36) NOT NULL PRIMARY KEY,
   event_time TIMESTAMP NOT NULL,
-  verb VARCHAR(32) NOT NULL,
-  object_type VARCHAR(32) NOT NULL,
-  object_id CHAR(36) NOT NULL,
-  object_name VARCHAR(255) NOT NULL,
-  context_object_type VARCHAR(32) NULL,
-  context_object_id CHAR(36) NULL,
-  context_object_name VARCHAR(255) NULL,
-  event_data JSON NULL
+  event_domain VARCHAR(32) NOT NULL,
+  event_type VARCHAR(64) NOT NULL,
+  aggregate_type VARCHAR(32) NOT NULL,
+  aggregate_id CHAR(36) NOT NULL,
+  event_payload_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE INDEX idx_feed_events_event_time ON feed_events (event_time DESC);
-CREATE INDEX idx_feed_events_context ON feed_events (context_object_type, context_object_id);
+CREATE INDEX idx_feed_events_type_time ON feed_events (event_domain, event_type, event_time DESC);
+CREATE INDEX idx_feed_events_aggregate ON feed_events (aggregate_type, aggregate_id, event_time DESC);
 
 --  ========================================
 --  feed_event_actors TABLE (feeds v2 CQRS projection)
@@ -424,16 +423,42 @@ VALUES
   ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary');
 
 --  Backfill feed_events and feed_event_actors from albums (released_at)
-INSERT INTO feed_events (event_id, event_time, verb, object_type, object_id, object_name, event_data)
-SELECT UUID(), TIMESTAMP(a.released_at), 'released', 'album', a.id, a.name, JSON_OBJECT('album_type', a.album_type, 'image_url', a.image_url)
-FROM albums a WHERE a.deleted_at IS NULL;
+INSERT INTO feed_events (
+  event_id,
+  event_time,
+  event_domain,
+  event_type,
+  aggregate_type,
+  aggregate_id,
+  event_payload_json
+)
+SELECT
+  UUID() AS event_id,
+  TIMESTAMP(a.released_at) AS event_time,
+  'catalog' AS event_domain,
+  'catalog.album_released' AS event_type,
+  'album' AS aggregate_type,
+  a.id AS aggregate_id,
+  JSON_OBJECT(
+    'releasedAt', TIMESTAMP(a.released_at),
+    'album', JSON_OBJECT(
+      'id', a.id,
+      'title', a.name,
+      'imageUrl', a.image_url,
+      'albumType', a.album_type
+    ),
+    'artists', JSON_ARRAY()
+  ) AS event_payload_json
+FROM albums a
+WHERE a.deleted_at IS NULL;
 
 INSERT INTO feed_event_actors (event_id, actor_type, actor_id, actor_name)
 SELECT fe.event_id, 'artist', ar.id, ar.name
 FROM feed_events fe
-JOIN album_artists aa ON aa.album_id = fe.object_id AND fe.object_type = 'album'
+JOIN album_artists aa ON aa.album_id = fe.aggregate_id AND fe.aggregate_type = 'album'
 JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
-WHERE fe.verb = 'released';
+WHERE fe.event_domain = 'catalog'
+  AND fe.event_type = 'catalog.album_released';
 
 --  Backfill activity_events and activity_event_actors from recent albums (released in last 60 days)
 INSERT INTO activity_events (

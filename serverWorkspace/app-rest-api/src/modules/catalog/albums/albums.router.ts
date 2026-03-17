@@ -24,4 +24,10 @@ albumsRouter.post(
   albumsController.releaseAlbumV2
 );
 
+albumsRouter.post(
+  "/:albumId/release/v3",
+  createRequestValidator({ params: albumParamsSchema }),
+  albumsController.releaseAlbumV3
+);
+
 export default albumsRouter;
