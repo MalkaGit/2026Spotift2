@@ -17,7 +17,7 @@ export async function getReleaseFeed(
   if (limit != null) searchParams.limit = String(limit);
   if (cursor != null && cursor.trim()) searchParams.cursor = cursor;
 
-  const { data } = await httpClient.get<ReleaseFeedResponse>('/me/feeds/v2/releases', {
+  const { data } = await httpClient.get<ReleaseFeedResponse>('/me/feeds/v3/releases', {
     params: searchParams,
     headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
     signal,

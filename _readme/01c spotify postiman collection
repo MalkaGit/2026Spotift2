@@ -582,6 +582,39 @@
       "response": []
     },
     {
+      "name": "uc00012-post-apbums-release - V1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5ODE3MjAsImV4cCI6MTc3Mjk4NTMyMCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.tULvgmBwbYuhuyTwqSHkQK-K7lRdAanazqa_9qa0O7o",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "albums",
+            "10000000-0000-4000-8000-000000000001",
+            "release",
+            "v1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "uc00012-get-feed-releases--whats-new-v1_a",
       "request": {
         "method": "GET",
@@ -771,13 +804,13 @@
       "response": []
     },
     {
-      "name": "uc00012-post-apbums-release - V1",
+      "name": "uc00012-post-apbums-release - V2",
       "request": {
         "method": "POST",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZThkNWQyNi1hNTJiLTQ0YzgtOGMxYi1hOTZjYTdhZjc4ZTciLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzI5ODE3MjAsImV4cCI6MTc3Mjk4NTMyMCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.tULvgmBwbYuhuyTwqSHkQK-K7lRdAanazqa_9qa0O7o",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjA4MGM4MS03ZDEyLTQ2NWUtODYyMy05ODhmMDlmM2NlYzEiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzM2NTg1NDQsImV4cCI6MTc3MzY2MjE0NCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.OJY0E8S0UU1LRzzUYQvIdpS7hJYOemjtI-Ao6DGHGsM",
             "type": "text"
           },
           {
@@ -787,7 +820,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v1",
+          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v2",
           "protocol": "http",
           "host": [
             "localhost"
@@ -797,7 +830,106 @@
             "albums",
             "10000000-0000-4000-8000-000000000001",
             "release",
-            "v1"
+            "v2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-get-feed-releases--whats-new-v2",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjA4MGM4MS03ZDEyLTQ2NWUtODYyMy05ODhmMDlmM2NlYzEiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzM2NTg1NDQsImV4cCI6MTc3MzY2MjE0NCwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.OJY0E8S0UU1LRzzUYQvIdpS7hJYOemjtI-Ao6DGHGsM",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/me/feeds/v2/releases",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "me",
+            "feeds",
+            "v2",
+            "releases"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-post-apbums-release - V3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MzM5ZTFmOS0wZjU4LTQ3MDQtYThkOC04MmZmMWQ0MThkY2YiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzM3NDY4MjksImV4cCI6MTc3Mzc1MDQyOSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.ec5EoA3A9nnJxeYCRPQMcBh7cC1BpxehzhsatbH38n8",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/albums/10000000-0000-4000-8000-000000000001/release/v3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "albums",
+            "10000000-0000-4000-8000-000000000001",
+            "release",
+            "v3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uc00012-get-feed-releases--whats-new-v3",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MzM5ZTFmOS0wZjU4LTQ3MDQtYThkOC04MmZmMWQ0MThkY2YiLCJlbWFpbCI6ImVtYWlsMUBnbWFpbC5jb20iLCJyb2xlIjoibGlzdGVuZXIiLCJpYXQiOjE3NzM3NDY4MjksImV4cCI6MTc3Mzc1MDQyOSwiYXVkIjoic3BvdGlmeS1hcHAtdXNlcnMiLCJpc3MiOiJzcG90aWZ5LWFwcCJ9.ec5EoA3A9nnJxeYCRPQMcBh7cC1BpxehzhsatbH38n8",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/me/feeds/v3/releases",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "me",
+            "feeds",
+            "v3",
+            "releases"
           ]
         }
       },
