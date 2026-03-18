@@ -4,8 +4,8 @@ import { createRequestValidator, jwtAuthMiddleware } from "@mycompanyname/lib-co
 import * as userController from "./users.controller";
 import { registerUserSchema, loginUserSchema } from "./types";
 
-import * as likesController from "../likes/likes.controller";
-import { AddLikeInputSchema, QueryLikesInputSchema } from "../likes/types";
+import * as likesController from "../social/likes/likes.controller";
+import { AddLikeInputSchema, QueryLikesInputSchema } from "../social/likes/types";
 
 const userRouter = Router();
 

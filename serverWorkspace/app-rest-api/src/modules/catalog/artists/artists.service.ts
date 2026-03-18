@@ -6,8 +6,8 @@ import { ForbiddenError, NotFoundError } from "@mycompanyname/lib-common";
 import type { Artist } from "./types";
 import { ArtistOverviewQueryInput, ArtistOverviewOutput } from "./types";
 import { ArtistsErrorCode } from "./artists.error.codes";
-import * as likesService from "../../likes";
-import { LIKED_ENTITY_ARTIST } from "../../likes/types";
+import * as likesService from "../../social/likes";
+import { LIKED_ENTITY_ARTIST } from "../../social/likes/types";
 import { artistsService } from "../../analytics/v3/api/artists";
 
 
