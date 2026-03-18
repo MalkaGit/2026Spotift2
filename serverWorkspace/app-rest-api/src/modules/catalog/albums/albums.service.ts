@@ -4,7 +4,7 @@ import * as activityEventsService from "../activity-events/activity-events.servi
 import * as feedsEventsService from "../../feeds/v3/writer/feeds-events.service";
 import type { Album } from "./types/album.model";
 import { AlbumsErrorCode } from "./albums.error.codes";
-import { AlbumReleasedEventPayload } from "../activity-events/types/catalog.activity-events.payloads";
+import { AlbumReleasedEventPayload } from "../activity-events/types/activity-events.payloads";
 
 /**
  * release Album v1:
@@ -81,7 +81,7 @@ export async function releaseAlbumV2(albumId: string): Promise<void> {
       artists: details.artists.map((a) => ({ id: a.id, name: a.name })),
     };
 
-    await activityEventsService.insertAlbumReleaseEvent(conn, eventId, payload);
+    await activityEventsService.insertAlbumReleaseActivityEvent(conn, eventId, payload);
 
     await conn.commit();
   } catch (err) {
@@ -218,7 +218,7 @@ export async function releaseAlbumV4a(albumId: string): Promise<void> {
       artists: details.artists.map((a) => ({ id: a.id, name: a.name })),
     };
 
-    await activityEventsService.insertAlbumReleaseEvent(conn, eventId, payload);
+    await activityEventsService.insertAlbumReleaseActivityEvent(conn, eventId, payload);
 
     await conn.commit();
   } catch (err) {
