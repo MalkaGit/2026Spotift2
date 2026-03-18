@@ -1,10 +1,10 @@
 import { ConflictError, NotFoundError, mysqlPool } from "@mycompanyname/lib-common";
 import * as albumsRepo from "./albums.repository";
-import * as activityEventsService from "../../activityEvents/activityEvents.service";
+import * as activityEventsService from "../activity-events/activity-events.service";
 import * as feedsEventsService from "../../feeds/v3/writer/feeds-events.service";
 import type { Album } from "./types/album.model";
 import { AlbumsErrorCode } from "./albums.error.codes";
-import { AlbumReleasedEventPayload } from "../_events/catalog.events.payloads";
+import { AlbumReleasedEventPayload } from "../activity-events/types/catalog.activity-events.payloads";
 
 /**
  * release Album v1:

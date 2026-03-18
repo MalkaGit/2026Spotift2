@@ -1,5 +1,3 @@
-
-
 /**
  * Input model for inserting actor rows for a single activity event.
  *
@@ -14,7 +12,6 @@ export interface AddActivityEventActorsInput {
 
 /**
  * A single actor row for an activity event.
- *
  * Mirrors one row in the `activity_event_actors` table.
  */
 export interface ActivityEventActor {

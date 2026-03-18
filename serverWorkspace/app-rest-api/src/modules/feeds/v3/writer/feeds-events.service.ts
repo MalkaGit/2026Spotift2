@@ -15,8 +15,8 @@ import {
   EVENT_TYPE_ALBUM_RELEASED,
   AGGREGATE_TYPE_ALBUM,
   ACTOR_TYPE_ARTIST,
-} from "../../../catalog/_events/catalog.events.constants";
-import type { AlbumReleasedEventPayload } from "../../../catalog/_events/catalog.events.payloads";
+} from "../../../catalog/activity-events/types/catalog.activity-events.constants";
+import type { AlbumReleasedEventPayload } from "../../../catalog/activity-events/types/catalog.activity-events.payloads";
 
 
 

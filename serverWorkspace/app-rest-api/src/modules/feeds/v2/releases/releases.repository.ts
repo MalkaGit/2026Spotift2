@@ -12,11 +12,11 @@ import {
   DOMAIN_CATALOG,
   EVENT_TYPE_ALBUM_RELEASED,
   EVENT_TYPE_EPISODE_RELEASED,
-} from "../../../catalog/_events/catalog.events.constants";
+} from "../../../catalog/activity-events/types/catalog.activity-events.constants";
 import type {
   AlbumReleasedEventPayload,
   EpisodeReleasedEventPayload,
-} from "../../../catalog/_events/catalog.events.payloads";
+} from "../../../catalog/activity-events/types/catalog.activity-events.payloads";
 import type {
   ReleaseFeedOutput,
   QueryReleaseFeedInput,
@@ -50,7 +50,7 @@ export async function getReleaseFeeds(
    * or same event_time and event_id > cursor (tie-break is ASC, so "after" means larger id).
    */
   const cursorCondition = cursorDecoded
-    ? `AND (ae.event_time < ? OR (ae.event_time = ? AND ae.event_id > ?))`
+    ? `AND (ae.event_occurred_at < ? OR (ae.event_occurred_at = ? AND ae.event_id > ?))`
     : "";
   const cursorParams = cursorDecoded
     ? [cursorDecoded.eventTime, cursorDecoded.eventTime, cursorDecoded.eventId]
@@ -63,7 +63,7 @@ export async function getReleaseFeeds(
    */
   const sql = `
     WITH page_events AS (
-      SELECT DISTINCT ae.event_id, ae.event_time, ae.event_type, ae.aggregate_id, ae.event_payload_json
+      SELECT DISTINCT ae.event_id, ae.event_occurred_at AS event_time, ae.event_type, ae.aggregate_id, ae.event_payload_json
       FROM likes l
       JOIN activity_event_actors aea ON aea.actor_id = l.entity_id AND aea.actor_type = l.entity_type
       JOIN activity_events ae ON ae.event_id = aea.event_id
@@ -72,9 +72,9 @@ export async function getReleaseFeeds(
         AND l.deleted_at IS NULL
         AND ae.event_domain = ?
         AND ae.event_type IN (?, ?)
-        AND ae.event_time >= CURDATE() - INTERVAL ? DAY
+        AND ae.event_occurred_at >= CURDATE() - INTERVAL ? DAY
         ${cursorCondition}
-      ORDER BY ae.event_time DESC, ae.event_id ASC
+      ORDER BY ae.event_occurred_at DESC, ae.event_id ASC
       LIMIT ?
     )
     SELECT pe.event_id, pe.event_time, pe.event_type, pe.aggregate_id, pe.event_payload_json, aea.actor_id, aea.actor_name

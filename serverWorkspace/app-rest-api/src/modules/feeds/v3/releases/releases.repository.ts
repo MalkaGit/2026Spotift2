@@ -11,11 +11,11 @@ import {
   DOMAIN_CATALOG,
   EVENT_TYPE_ALBUM_RELEASED,
   EVENT_TYPE_EPISODE_RELEASED,
-} from "../../../catalog/_events/catalog.events.constants";
+} from "../../../catalog/activity-events/types/catalog.activity-events.constants";
 import type {
   AlbumReleasedEventPayload,
   EpisodeReleasedEventPayload,
-} from "../../../catalog/_events/catalog.events.payloads";
+} from "../../../catalog/activity-events/types/catalog.activity-events.payloads";
 import type {
   ReleaseFeedOutput,
   QueryReleaseFeedInput,
