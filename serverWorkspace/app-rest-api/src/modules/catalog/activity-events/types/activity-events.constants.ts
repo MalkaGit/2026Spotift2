@@ -3,11 +3,11 @@
  *
  */
 
-export const DOMAIN_CATALOG = "catalog" as const;
+export const EVENTS_STREAM = "catalog" as const;
 
 export const EventTypes = {
-  ALBUM_RELEASED: "catalog.album_released",
-  EPISODE_RELEASED: "catalog.episode_released",
+  CATALOG_ALBUM_RELEASED: "catalog.album_released",
+  CATALOG_EPISODE_RELEASED: "catalog.episode_released",
 } as const;
 
 export const ActorTypes = {
