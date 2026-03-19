@@ -16,7 +16,7 @@
 export interface AddActivityEventInput<TEventPayload = unknown> {
   eventId: string;
   eventOccurredAt: Date;
-  eventDomain: string;
+  eventStreamName: string;
   eventType: string;         
   aggregateType: string;     
   aggregateId: string;      
