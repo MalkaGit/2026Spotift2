@@ -46,9 +46,11 @@ import { tracksAnalyticsRouter as tracksAnalyticsV2Router } from "./modules/anal
 import { tracksAnalyticsRouter as tracksAnalyticsV3Router } from "./modules/analytics/v3/api/tracks";
 import { searchRouter as searchV1Router } from "./modules/search/v1";
 import { searchRouter as searchV2Router } from "./modules/search/v2";
-import { releaseFeedsRouter as releaseFeedsV1Router } from "./modules/feeds/v1/releases";
-import { releaseFeedsRouter as releaseFeedsV2Router } from "./modules/feeds/v2/releases";
-import { releaseFeedsRouter as releaseFeedsV3Router } from "./modules/feeds/v3/releases";
+import { releaseFeedsRouter as releaseFeedsV1Router } from "./modules/feeds/_old/v1/releases";
+import { releaseFeedsRouter as releaseFeedsV2Router } from "./modules/feeds/_old/v2/releases";
+import { releaseFeedsRouter as releaseFeedsV3Router } from "./modules/feeds/_old/v3/releases";
+import { releaseFeedsRouter as releaseFeedsRouterV4a } from "./modules/feeds/v4a/api/releases";
+import { whatsNewRouter as whatsNewV1Router } from "./modules/feeds/whats-new/v1";
 
 const app = express();
 
@@ -96,7 +98,9 @@ app.use("/search/v1", searchV1Router);  //v1: read from domain tables (albums + 
 app.use("/search/v2", searchV2Router);  //v2: read from domain tables (albums + album_artists) using fulltext search
 app.use("/me/feeds/v1/releases", releaseFeedsV1Router); // v1: read from domain tables (albums + album_artists)
 app.use("/me/feeds/v2/releases", releaseFeedsV2Router); // v2: read from activity_events + activity_event_actors
-app.use("/me/feeds/v3/releases", releaseFeedsV3Router); // v3: read from feed_events + feed_event_actors
+app.use("/me/feeds/v3/releases", releaseFeedsV3Router); // v3: read from `feeds` + `feed_actors`
+app.use("/me/feeds/v4a/releases", releaseFeedsRouterV4a); // v4a: read from `feeds` + `feed_actors` populated by v4a workers
+app.use("/me/feeds/whats-new/v1", whatsNewV1Router);      //read from source of truth tables
 app.use("/analytics/v1/tracks", tracksAnalyticsV1Router);
 app.use("/analytics/v2/tracks", tracksAnalyticsV2Router);
 app.use("/analytics/v3/tracks", tracksAnalyticsV3Router);

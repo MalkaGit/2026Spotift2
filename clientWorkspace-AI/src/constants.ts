@@ -1,2 +1,2 @@
-/** Minimum number of artists required in library to use the app (onboarding rule). */
+/** Suggested minimum artists for a full “for you” experience (optional; not enforced on startup). */
 export const MIN_ARTISTS = 3;

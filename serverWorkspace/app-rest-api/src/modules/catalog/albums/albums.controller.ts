@@ -51,7 +51,7 @@ export async function releaseAlbumV2(
 
 /**
  * POST /albums/:albumId/release/v3
- *  Marks an album as released: updates albums.released_at and inserts into feed_events and feed_event_actors.
+ *  Marks an album as released: updates albums.released_at and inserts into `feeds` and `feed_actors`.
  *
  * @returns 204 No Content; 400 invalid UUID; 404 album not found  401/403 if not authenticated or not admin. 409 - conflict erorr if already released
  */
@@ -63,6 +63,26 @@ export async function releaseAlbumV3(
   try {
     const albumId = req.params.albumId;
     await albumsService.releaseAlbumV3(albumId);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /albums/:albumId/release/v4a
+ * Marks an album as released: updates albums.released_at and inserts into activity_events + activity_event_actors.
+ *
+ * @returns 204 No Content; 400 invalid UUID; 404 album not found  401/403 if not authenticated or not admin. 409 - conflict erorr if already released
+ */
+export async function releaseAlbumV4a(
+  req: TypedRequest<unknown, { albumId: string }>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const albumId = req.params.albumId;
+    await albumsService.releaseAlbumV4a(albumId);
     res.status(204).end();
   } catch (err) {
     next(err);
