@@ -17,6 +17,7 @@
  *     // call other repositories that accept the same tx instance...
  *   });
  *
+ * 
  * If we later change the SQL driver or MySQL client, only this file (and db.client.ts)
  * need to be updated; services and repositories keep the same imports and signatures.
  */
