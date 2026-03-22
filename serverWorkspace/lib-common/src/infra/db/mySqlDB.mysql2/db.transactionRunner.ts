@@ -21,7 +21,13 @@
  * need to be updated; services and repositories keep the same imports and signatures.
  */
 
-import type { PoolConnection, RowDataPacket, ResultSetHeader } from "mysql2/promise";
+import type {
+  FieldPacket,
+  PoolConnection,
+  QueryResult,
+  ResultSetHeader,
+  RowDataPacket,
+} from "mysql2/promise";
 import { pool } from "./db.client";
 
 /**
@@ -33,12 +39,12 @@ export interface DbTransaction {
   query<T extends RowDataPacket[] | RowDataPacket[][] = RowDataPacket[]>(
     sql: string,
     params?: unknown[]
-  ): Promise<[T, ResultSetHeader] | [T]>;
+  ): Promise<[T, FieldPacket[]]>;
 
-  execute<T = ResultSetHeader>(
+  execute<T extends QueryResult = ResultSetHeader>(
     sql: string,
     params?: unknown[]
-  ): Promise<[T, ResultSetHeader] | [T]>;
+  ): Promise<[T, FieldPacket[]]>;
 }
 
 /**
@@ -54,7 +60,7 @@ class MySqlDbTransaction implements DbTransaction {
     return this.conn.query<T>(sql, params);
   }
 
-  execute<T = ResultSetHeader>(sql: string, params: unknown[] = []) {
+  execute<T extends QueryResult = ResultSetHeader>(sql: string, params: unknown[] = []) {
     return this.conn.execute<T>(sql, params);
   }
 }
