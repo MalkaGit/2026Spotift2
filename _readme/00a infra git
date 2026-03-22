@@ -92,8 +92,12 @@ git push origin  `my-feature-branch-name`
 
 
 
-
-
+**optional: update targe (dev) after upp requst**
+git branch
+git switch dev
+git log -n 2
+git pull origin dev
+git log -n 2
 ===============================================
 ### A Terminilogy
 ===============================================
