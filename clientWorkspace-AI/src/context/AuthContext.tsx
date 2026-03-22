@@ -2,10 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useNavigate } from 'react-router-dom';
 import * as authApi from '@/api/authApi';
 import * as userApi from '@/api/userApi';
-import { getMyLikes } from '@/api/likesApi';
 import { setAuthToken, setStoredToken, clearStoredToken, getStoredToken } from '@/api/httpClient';
-import { MIN_ARTISTS } from '@/constants';
-import { getArtistCount } from '@/utils/library';
 import type { UserProfile } from '@/types';
 import type { LoginCredentials, RegisterInput } from '@/types';
 
@@ -61,14 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(accessToken);
       const user = await userApi.getMe();
       setState({ user, token: accessToken, isAuthenticated: true, isInitialized: true });
-
-      const { items } = await getMyLikes({ limit: 100 });
-      const artistCount = getArtistCount(items);
-      if (artistCount < MIN_ARTISTS) {
-        navigate('/onboarding/favorites', { replace: true, state: { fromLogin: true, artistCount } });
-      } else {
-        navigate('/library', { replace: true });
-      }
+      navigate('/library', { replace: true });
     },
     [navigate]
   );

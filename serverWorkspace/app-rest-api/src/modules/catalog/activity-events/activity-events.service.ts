@@ -1,6 +1,10 @@
 import type { MySqlConnection } from "@mycompanyname/lib-common";
 import * as activityEventsRepository from "../../../infrastructure/activity-events/activity-events.repository";
-import { EVENTS_STREAM, ActorTypes, EventTypes, AggregateTypes } from "./types/activity-events.constants";
+import {
+  ACTIVITY_EVENTS_TABLE_NAMES,
+  ACTIVITY_EVENT_ACTORS_TABLE_NAMES,
+} from "../../../infrastructure/activity-events/types/activity-events.table-names";
+import { ActorTypes, EventTypes, AggregateTypes } from "./types/activity-events.constants";
 import type { AlbumReleasedEventPayload } from "./types/activity-events.payloads";
 
 
@@ -195,10 +199,9 @@ export async function insertAlbumReleaseActivityEvent(
   eventId: string,
   payload: AlbumReleasedEventPayload
 ): Promise<void> {
-  await activityEventsRepository.insertActivityEvent(conn, {
+  await activityEventsRepository.insertActivityEvent(conn, ACTIVITY_EVENTS_TABLE_NAMES.activity_events, {
     eventId,
     eventOccurredAt: payload.releasedAt,
-    eventStreamName: EVENTS_STREAM,
     eventType: EventTypes.CATALOG_ALBUM_RELEASED,
     aggregateType: AggregateTypes.ALBUM,
     aggregateId: payload.album.id,
@@ -206,13 +209,17 @@ export async function insertAlbumReleaseActivityEvent(
     schemaVersion: 1,
   });
 
-  await activityEventsRepository.insertActivityEventActors(conn, {
-    eventId,
-    actors: payload.artists.map((artist) => ({
-      actorType: ActorTypes.ARTIST,
-      actorId: artist.id,
-      actorName: artist.name,
-    })),
-  });
+  await activityEventsRepository.insertActivityEventActors(
+    conn,
+    ACTIVITY_EVENT_ACTORS_TABLE_NAMES.activity_event_actors,
+    {
+      eventId,
+      actors: payload.artists.map((artist) => ({
+        actorType: ActorTypes.ARTIST,
+        actorId: artist.id,
+        actorName: artist.name,
+      })),
+    }
+  );
 }
 

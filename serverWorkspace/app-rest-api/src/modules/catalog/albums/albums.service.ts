@@ -1,7 +1,7 @@
 import { ConflictError, NotFoundError, mysqlPool } from "@mycompanyname/lib-common";
 import * as albumsRepo from "./albums.repository";
 import * as activityEventsService from "../activity-events/activity-events.service";
-import * as feedsEventsService from "../../feeds/v3/writer/feeds-events.service";
+import * as feedsEventsService from "../../feeds/_old/v3/writer/feeds-events.service";
 import type { Album } from "./types/album.model";
 import { AlbumsErrorCode } from "./albums.error.codes";
 import { AlbumReleasedEventPayload } from "../activity-events/types/activity-events.payloads";
@@ -98,7 +98,7 @@ export async function releaseAlbumV2(albumId: string): Promise<void> {
 
 /**
  * Release album V3: set released_at and record the release directly
- * into the feed projection tables (feed_events + feed_event_actors).
+ * into the feed projection tables (`feeds` + `feed_actors`).
  *
  * This mirrors the V2 flow but writes to feeds v3 instead of
  * activity_events. All writes happen inside a single transaction.

@@ -3,20 +3,22 @@ import type { AddActivityEventInput } from "./types/add.activity.event.input.mod
 import type { AddActivityEventActorsInput } from "./types/add.activity.event.actors.input.model";
 import type { ActivityEventItem } from "./types/activityEvent.item.model";
 import type { ActivityEventActorItem } from "./types/activityEventActor.item.model";
+import {
+  ACTIVITY_EVENTS_TABLE_NAMES,
+  ACTIVITY_EVENT_ACTORS_TABLE_NAMES,
+} from "./types/activity-events.table-names";
 
-const LOG_SCOPE = "activityEvents.repository";
+const SUPPORTED_ACTIVITY_EVENTS_TABLES = new Set<string>([
+  ...Object.values(ACTIVITY_EVENTS_TABLE_NAMES),
+]);
 
-
+const SUPPORTED_ACTIVITY_EVENT_ACTORS_TABLES = new Set<string>([
+  ...Object.values(ACTIVITY_EVENT_ACTORS_TABLE_NAMES),
+]);
 
 
 /**
- * Inserts a single event row into `activity_events`.
- * Critical:
- * - for now we have single activity events table for all events,
- *   and the method writs to that table.
- *   Later on, we might have per-doamin (catalog, player, etc.) activity events tables.
- *   on that case the method will write to different tables 
- *   by the event stream name passed as parameter.
+ * Inserts a single event row into a per-domain `activity_events_*` table.
  *   
  * Notes:
  * - This repository api is generic.
@@ -30,26 +32,28 @@ const LOG_SCOPE = "activityEvents.repository";
  */
 export async function insertActivityEvent<TEventPayload>(
   conn: MySqlConnection,
+  activityEventsTable: string,
   event: AddActivityEventInput<TEventPayload>
 ): Promise<void> {
+  if (!SUPPORTED_ACTIVITY_EVENTS_TABLES.has(activityEventsTable)) {
+    throw new Error(`Unsupported activity events table: ${activityEventsTable}`);
+  }
   const payloadJson = JSON.stringify(event.eventPayload ?? null);
   const sqlEvent = `
-    INSERT INTO activity_events (
+    INSERT INTO ${activityEventsTable} (
       event_id,
       event_occurred_at,
-      event_stream_name,
       event_type,
       aggregate_type,
       aggregate_id,
       event_payload_json,
       schema_version
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
   const paramsEvent = [
     event.eventId,
     event.eventOccurredAt,
-    event.eventStreamName,
     event.eventType,
     event.aggregateType,
     event.aggregateId,
@@ -57,12 +61,65 @@ export async function insertActivityEvent<TEventPayload>(
     event.schemaVersion,
   ];
 
-  logger.debug(`${LOG_SCOPE}.insertActivityEvent - insert activity_events`, {
+  logger.debug(`insertActivityEvent - insert activity_events`, {
     sql: sqlEvent.replace(/\s+/g, " ").trim(),
     params: paramsEvent,
   });
   await conn.query(sqlEvent, paramsEvent);
 }
+
+/**
+ * Fetch activity events from a given activity-events table after a cursor.
+ * Events are ordered ascending by sequence_no for stable incremental processing.
+ *
+ * - `activityEventsTable` selects which per-domain table to read.
+ * - `lastSequenceNo` is the cursor (sequence_no) after which events are returned.
+ * - Note: the method returns ***all the events*** in the given stream from the given cursor
+ *   The consumer (projection worker) is responsible for filtering the returned events by the specific `event_type` values it cares about.
+ *
+ * Intended for projection workers that consume the shared activity log.
+ */
+export async function getActivityEventsAfterSequence(
+  activityEventsTable: string,
+  lastSequenceNo: number | null,
+  limit: number
+): Promise<ActivityEventItem[]> {
+  if (!SUPPORTED_ACTIVITY_EVENTS_TABLES.has(activityEventsTable)) {
+    throw new Error(`Unsupported activity events table: ${activityEventsTable}`);
+  }
+
+  if (limit <= 0) return [];
+  
+  const effectiveLastSequenceNo = lastSequenceNo ?? 0;
+
+  const [rows] = await mysqlPool.query(
+    `SELECT sequence_no, event_id, event_occurred_at, event_type, aggregate_type, aggregate_id, event_payload_json
+     FROM ${activityEventsTable}
+     WHERE sequence_no > ?
+     ORDER BY sequence_no ASC
+     LIMIT ?`,
+    [effectiveLastSequenceNo, limit]
+  );
+
+  const list = (rows as Record<string, unknown>[]) ?? [];
+  return list.map((r) => ({
+    sequence_no: Number(r.sequence_no ?? 0),
+    event_id: String(r.event_id ?? ""),
+    event_occurred_at: r.event_occurred_at instanceof Date
+        ? r.event_occurred_at
+        : new Date(String(r.event_occurred_at)),
+    event_type: String(r.event_type ?? ""),
+    aggregate_type: String(r.aggregate_type ?? ""),
+    aggregate_id: String(r.aggregate_id ?? ""),
+    // MySQL JSON may come back as string or as a parsed object depending on the driver.
+    // We normalize to a string to keep the worker/projection code predictable.
+    event_payload_json: typeof r.event_payload_json === "string"
+    ? r.event_payload_json
+    : JSON.stringify(r.event_payload_json ?? null),
+  }));
+}
+
+
 
 /**
  * Insert actor rows for a given event into activity_event_actors.
@@ -71,13 +128,17 @@ export async function insertActivityEvent<TEventPayload>(
 */
 export async function insertActivityEventActors(
   conn: MySqlConnection,
+  activityEventActorsTable: string,
   input: AddActivityEventActorsInput
 ): Promise<void> {
+  if (!SUPPORTED_ACTIVITY_EVENT_ACTORS_TABLES.has(activityEventActorsTable)) {
+    throw new Error(`Unsupported activity event actors table: ${activityEventActorsTable}`);
+  }
   if (input.actors.length === 0) return;
 
   const valuesPlaceholders = input.actors.map(() => "(?, ?, ?, ?)").join(", ");
   const sqlActor = `
-    INSERT INTO activity_event_actors (
+    INSERT INTO ${activityEventActorsTable} (
       event_id,
       actor_type,
       actor_id,
@@ -93,7 +154,7 @@ export async function insertActivityEventActors(
     actor.actorName,
   ]);
 
-  logger.debug(`${LOG_SCOPE}.insertActivityEventActors - insert activity_event_actors`, {
+  logger.debug(`insertActivityEventActors - insert activity_event_actors`, {
     sql: sqlActor.replace(/\s+/g, " ").trim(),
     params: paramsActor,
   });
@@ -101,63 +162,13 @@ export async function insertActivityEventActors(
   await conn.query(sqlActor, paramsActor);
 }
 
-
-/**
- * Fetch activity events from given stream name after given cursor.
- * Events are ordered ascending by sequence_no for stable incremental processing.
- *
- * - `eventStreamName` is stream identifier (catalog, player etc)
- * - `lastSequenceNo` is the cursor (sequence_no) after which events are returned.
- * - Note: the method returns ***all the events*** in the given stream from the given cursor
- *   The consumer (projection worker) is responsible for filtering the returned events by the specific `event_type` values it cares about.
- *
- * Intended for projection workers that consume the shared activity log.
- */
-export async function getActivityEventsAfterSequence(
-  eventStreamName: string, 
-  lastSequenceNo: number | null,
-  limit: number
-): Promise<ActivityEventItem[]> {
-
-  if (limit <= 0) return [];
-  
-  const effectiveLastSequenceNo = lastSequenceNo ?? 0;
-
-  const [rows] = await mysqlPool.query(
-    `SELECT sequence_no, event_id, event_occurred_at, event_stream_name, event_type, aggregate_type, aggregate_id, event_payload_json
-     FROM activity_events
-     WHERE event_stream_name = ?
-       AND sequence_no > ?
-     ORDER BY sequence_no ASC
-     LIMIT ?`,
-    [eventStreamName, effectiveLastSequenceNo, limit]
-  );
-
-  const list = (rows as Record<string, unknown>[]) ?? [];
-  return list.map((r) => ({
-    sequence_no: Number(r.sequence_no ?? 0),
-    event_id: String(r.event_id ?? ""),
-    event_occurred_at: r.event_occurred_at instanceof Date
-        ? r.event_occurred_at
-        : new Date(String(r.event_occurred_at)),
-    event_stream_name: String(r.event_stream_name ?? ""),
-    event_type: String(r.event_type ?? ""),
-    aggregate_type: String(r.aggregate_type ?? ""),
-    aggregate_id: String(r.aggregate_id ?? ""),
-    // MySQL JSON may come back as string or as a parsed object depending on the driver.
-    // We normalize to a string to keep the worker/projection code predictable.
-    event_payload_json: typeof r.event_payload_json === "string"
-    ? r.event_payload_json
-    : JSON.stringify(r.event_payload_json ?? null),
-  }));
-}
-
-
-
-
 export async function getActorsForEventIds(
+  activityEventActorsTable: string,
   eventIds: string[]
 ): Promise<ActivityEventActorItem[]> {
+  if (!SUPPORTED_ACTIVITY_EVENT_ACTORS_TABLES.has(activityEventActorsTable)) {
+    throw new Error(`Unsupported activity event actors table: ${activityEventActorsTable}`);
+  }
   
   if (eventIds.length === 0) return [];
   
@@ -167,7 +178,7 @@ export async function getActorsForEventIds(
   const placeholders = uniqueEventIds.map(() => "?").join(", ");
   const [rows] = await mysqlPool.query(
     `SELECT event_id, actor_type, actor_id, actor_name
-     FROM activity_event_actors
+     FROM ${activityEventActorsTable}
      WHERE event_id IN (${placeholders})
      ORDER BY event_id ASC, actor_type ASC, actor_id ASC`,
     uniqueEventIds

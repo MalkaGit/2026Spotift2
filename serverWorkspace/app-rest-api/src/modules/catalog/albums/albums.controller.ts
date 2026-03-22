@@ -51,7 +51,7 @@ export async function releaseAlbumV2(
 
 /**
  * POST /albums/:albumId/release/v3
- *  Marks an album as released: updates albums.released_at and inserts into feed_events and feed_event_actors.
+ *  Marks an album as released: updates albums.released_at and inserts into `feeds` and `feed_actors`.
  *
  * @returns 204 No Content; 400 invalid UUID; 404 album not found  401/403 if not authenticated or not admin. 409 - conflict erorr if already released
  */

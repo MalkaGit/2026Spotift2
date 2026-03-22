@@ -315,15 +315,18 @@ CREATE TABLE track_events_checkpoint (
 ) ENGINE=InnoDB;
 
 --  ========================================
---  activity_events TABLE (centralized activity log)
+--  activity_events (single table)
 --  ========================================
+
+-- activity_events
 DROP TABLE IF EXISTS activity_event_actors;
 DROP TABLE IF EXISTS activity_events;
 
+-- aev4a: one shared events/actors table
 CREATE TABLE activity_events (
-  event_id CHAR(36) NOT NULL PRIMARY KEY,
-  event_time TIMESTAMP NOT NULL,
-  event_domain VARCHAR(32) NOT NULL,
+  sequence_no BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  event_id CHAR(36) NOT NULL UNIQUE,
+  event_occurred_at TIMESTAMP NOT NULL,
   event_type VARCHAR(64) NOT NULL,
   aggregate_type VARCHAR(32) NOT NULL,
   aggregate_id CHAR(36) NOT NULL,
@@ -332,60 +335,79 @@ CREATE TABLE activity_events (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_activity_events_event_time ON activity_events (event_time DESC);
-CREATE INDEX idx_activity_events_type_time ON activity_events (event_domain, event_type, event_time DESC);
-CREATE INDEX idx_activity_events_aggregate ON activity_events (aggregate_type, aggregate_id, event_time DESC);
+CREATE INDEX idx_aev4a_activity_events_sequence_no ON activity_events (sequence_no DESC);
+CREATE INDEX idx_aev4a_activity_events_event_occurred_at ON activity_events (event_occurred_at DESC);
+CREATE INDEX idx_aev4a_activity_events_type_occurred_at ON activity_events (event_type, event_occurred_at DESC);
+CREATE INDEX idx_aev4a_activity_events_aggregate ON activity_events (aggregate_type, aggregate_id, event_occurred_at DESC);
 
---  ========================================
---  activity_event_actors TABLE (centralized activity log)
---  ========================================
 CREATE TABLE activity_event_actors (
   event_id CHAR(36) NOT NULL,
   actor_type VARCHAR(32) NOT NULL,
   actor_id CHAR(36) NOT NULL,
   actor_name VARCHAR(255) NOT NULL,
   PRIMARY KEY (event_id, actor_id),
-  CONSTRAINT fk_activity_event_actors_event FOREIGN KEY (event_id)
+  CONSTRAINT fk_aev4a_activity_event_actors_event FOREIGN KEY (event_id)
     REFERENCES activity_events(event_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_activity_event_actors_actor ON activity_event_actors (actor_type, actor_id, event_id DESC);
+CREATE INDEX idx_aev4a_activity_event_actors_actor ON activity_event_actors (actor_type, actor_id, event_id DESC);
 
 --  ========================================
---  feed_events TABLE (feeds CQRS projection)
+--  feeds TABLE (global feeds CQRS projection)
 --  ========================================
-DROP TABLE IF EXISTS feed_event_actors;
-DROP TABLE IF EXISTS feed_events;
+DROP TABLE IF EXISTS feed_actors;
+DROP TABLE IF EXISTS feeds;
 
-CREATE TABLE feed_events (
-  event_id CHAR(36) NOT NULL PRIMARY KEY,
-  event_time TIMESTAMP NOT NULL,
-  event_domain VARCHAR(32) NOT NULL,
-  event_type VARCHAR(64) NOT NULL,
-  aggregate_type VARCHAR(32) NOT NULL,
-  aggregate_id CHAR(36) NOT NULL,
-  event_payload_json JSON NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE feeds (
+  feed_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  event_id CHAR(36) NOT NULL,
+  event_occurred_at TIMESTAMP NOT NULL,
+  feed_type VARCHAR(32) NOT NULL,
+  feed_verb VARCHAR(64) NOT NULL,
+  feed_object_type VARCHAR(32) NOT NULL,
+  feed_object_id CHAR(36) NOT NULL,
+  feed_object_title VARCHAR(255) NOT NULL,
+  feed_object_sub_title VARCHAR(255) NULL,
+  feed_object_image_url VARCHAR(1024) NULL,
+  feed_object_payload_json JSON NOT NULL,
+  feed_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_feeds_event_feed_type (event_id, feed_type)
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_feed_events_event_time ON feed_events (event_time DESC);
-CREATE INDEX idx_feed_events_type_time ON feed_events (event_domain, event_type, event_time DESC);
-CREATE INDEX idx_feed_events_aggregate ON feed_events (aggregate_type, aggregate_id, event_time DESC);
+CREATE INDEX idx_feeds_type_id ON feeds (feed_type, feed_id DESC);
+CREATE INDEX idx_feeds_type_verb_id ON feeds (feed_type, feed_verb, feed_id DESC);
+CREATE INDEX idx_feeds_object_id ON feeds (feed_object_type, feed_object_id, feed_id DESC);
+CREATE INDEX idx_feeds_occurred_id ON feeds (event_occurred_at DESC, feed_id DESC);
 
 --  ========================================
---  feed_event_actors TABLE (feeds v2 CQRS projection)
+--  feed_actors TABLE (feeds projection actors)
 --  ========================================
-CREATE TABLE feed_event_actors (
+CREATE TABLE feed_actors (
   event_id CHAR(36) NOT NULL,
+  feed_type VARCHAR(32) NOT NULL,
   actor_type VARCHAR(32) NOT NULL,
   actor_id CHAR(36) NOT NULL,
   actor_name VARCHAR(255) NOT NULL,
-  PRIMARY KEY (event_id, actor_id),
-  CONSTRAINT fk_feed_event_actors_event FOREIGN KEY (event_id)
-    REFERENCES feed_events(event_id) ON DELETE CASCADE
+  actor_image_url VARCHAR(1024) NULL,
+  PRIMARY KEY (event_id, feed_type, actor_id),
+  CONSTRAINT fk_feed_actors_feeds FOREIGN KEY (event_id, feed_type)
+    REFERENCES feeds(event_id, feed_type) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_feed_event_actors_actor ON feed_event_actors (actor_type, actor_id, event_id DESC);
+CREATE INDEX idx_feed_actors_actor ON feed_actors (actor_type, actor_id, event_id DESC);
+
+--  ========================================
+--  feed_worker_offset TABLE (feeds v4a worker checkpoint)
+--  ========================================
+DROP TABLE IF EXISTS feed_worker_offset;
+
+CREATE TABLE feed_worker_offset (
+  worker_name VARCHAR(64) NOT NULL,                     -- logical worker id, e.g. 'feeds_v4a'
+  stream_name VARCHAR(64) NOT NULL,                    -- logical stream id, e.g. 'activity_events'
+  last_sequence_no BIGINT NULL,                         -- last processed sequence_no for that stream
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (worker_name, stream_name)
+) ENGINE=InnoDB;
 
 --  ========================================
 --  Seed albums, tracks, and stats
@@ -422,23 +444,29 @@ VALUES
   -- Beyoncé
   ('40000000-0000-4000-8000-000000000001', '444a1e45-c1c2-4b56-a331-eba6bd9b9db8', 'primary');
 
---  Backfill feed_events and feed_event_actors from albums (released_at)
-INSERT INTO feed_events (
+--  Backfill feeds and feed_actors from albums (released_at)
+INSERT INTO feeds (
   event_id,
-  event_time,
-  event_domain,
-  event_type,
-  aggregate_type,
-  aggregate_id,
-  event_payload_json
+  event_occurred_at,
+  feed_type,
+  feed_verb,
+  feed_object_type,
+  feed_object_id,
+  feed_object_title,
+  feed_object_sub_title,
+  feed_object_image_url,
+  feed_object_payload_json
 )
 SELECT
   UUID() AS event_id,
-  TIMESTAMP(a.released_at) AS event_time,
-  'catalog' AS event_domain,
-  'catalog.album_released' AS event_type,
-  'album' AS aggregate_type,
-  a.id AS aggregate_id,
+  TIMESTAMP(a.released_at) AS event_occurred_at,
+  'whats_new' AS feed_type,
+  'catalog.album_released' AS feed_verb,
+  'album' AS feed_object_type,
+  a.id AS feed_object_id,
+  a.name AS feed_object_title,
+  NULL AS feed_object_sub_title,
+  a.image_url AS feed_object_image_url,
   JSON_OBJECT(
     'releasedAt', TIMESTAMP(a.released_at),
     'album', JSON_OBJECT(
@@ -448,23 +476,22 @@ SELECT
       'albumType', a.album_type
     ),
     'artists', JSON_ARRAY()
-  ) AS event_payload_json
+  ) AS feed_object_payload_json
 FROM albums a
 WHERE a.deleted_at IS NULL;
 
-INSERT INTO feed_event_actors (event_id, actor_type, actor_id, actor_name)
-SELECT fe.event_id, 'artist', ar.id, ar.name
-FROM feed_events fe
-JOIN album_artists aa ON aa.album_id = fe.aggregate_id AND fe.aggregate_type = 'album'
+INSERT INTO feed_actors (event_id, feed_type, actor_type, actor_id, actor_name, actor_image_url)
+SELECT fe.event_id, fe.feed_type, 'artist', ar.id, ar.name, NULL
+FROM feeds fe
+JOIN album_artists aa ON aa.album_id = fe.feed_object_id AND fe.feed_object_type = 'album'
 JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
-WHERE fe.event_domain = 'catalog'
-  AND fe.event_type = 'catalog.album_released';
+WHERE fe.feed_type = 'whats_new'
+  AND fe.feed_verb = 'catalog.album_released';
 
 --  Backfill activity_events and activity_event_actors from recent albums (released in last 60 days)
 INSERT INTO activity_events (
   event_id,
-  event_time,
-  event_domain,
+  event_occurred_at,
   event_type,
   aggregate_type,
   aggregate_id,
@@ -473,8 +500,7 @@ INSERT INTO activity_events (
 )
 SELECT
   UUID() AS event_id,
-  TIMESTAMP(a.released_at) AS event_time,
-  'catalog' AS event_domain,
+  TIMESTAMP(a.released_at) AS event_occurred_at,
   'catalog.album_released' AS event_type,
   'album' AS aggregate_type,
   a.id AS aggregate_id,
@@ -499,11 +525,9 @@ FROM activity_events ae
 JOIN album_artists aa
   ON aa.album_id = ae.aggregate_id
   AND ae.aggregate_type = 'album'
-  AND ae.event_domain = 'catalog'
   AND ae.event_type = 'catalog.album_released'
 JOIN artists ar ON ar.id = aa.artist_id AND ar.deleted_at IS NULL
-WHERE ae.event_time >= CURDATE() - INTERVAL 60 DAY;
-
+WHERE ae.event_occurred_at >= CURDATE() - INTERVAL 60 DAY;
 --  Seed tracks (id, name, duration_ms, album_id)
 INSERT INTO tracks (id, name, duration_ms, album_id)
 VALUES
