@@ -27,6 +27,26 @@
       "response": []
     },
     {
+      "name": "uc00000 health - railway",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "backend-production-ec42b.up.railway.app/health",
+          "host": [
+            "backend-production-ec42b",
+            "up",
+            "railway",
+            "app"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "uc00001-register-user",
       "request": {
         "auth": {
@@ -62,6 +82,46 @@
           ]
         },
         "description": "http://localhost:3000/users/register"
+      },
+      "response": []
+    },
+    {
+      "name": "uc00001-register-user   - railway",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"email1@gmail.com\",\r\n    \"password\":\"Aa123456789!\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://backend-production-ec42b.up.railway.app/users/register",
+          "protocol": "https",
+          "host": [
+            "backend-production-ec42b",
+            "up",
+            "railway",
+            "app"
+          ],
+          "path": [
+            "users",
+            "register"
+          ]
+        }
       },
       "response": []
     },
